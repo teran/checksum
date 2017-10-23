@@ -1,0 +1,10 @@
+bin/
+pkg/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.glide/
+.DS_Store
