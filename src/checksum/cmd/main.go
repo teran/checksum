@@ -1,15 +1,15 @@
 package main
 
 import (
-  "crypto/sha256"
-  "encoding/hex"
-  "flag"
-  "fmt"
-  "io"
-  "log"
-  "os"
-  "runtime"
-  "sync"
+	"crypto/sha256"
+	"encoding/hex"
+	"flag"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"runtime"
+	"sync"
 )
 
 var wg sync.WaitGroup
@@ -18,20 +18,19 @@ var wg sync.WaitGroup
 var Version = "No version specified(probably trunk build)"
 
 func calculate(filename string) {
-  fp, err := os.Open(filename)
-  if err != nil {
-    log.Fatal(err)
-  }
-  defer fp.Close()
+	fp, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fp.Close()
 
-  sha256 := sha256.New()
-  if _, err := io.Copy(sha256, fp); err != nil {
-    log.Fatal(err)
-  }
+	sha256 := sha256.New()
+	if _, err := io.Copy(sha256, fp); err != nil {
+		log.Fatal(err)
+	}
 
-  fmt.Printf(
-    "%s  %s\n", hex.EncodeToString(sha256.Sum(nil)), filename)
-  wg.Done()
+	fmt.Printf("%s  %s\n", hex.EncodeToString(sha256.Sum(nil)), filename)
+	wg.Done()
 }
 
 func verify() {
@@ -39,13 +38,13 @@ func verify() {
 }
 
 func printVersion() {
-  fmt.Println(Version)
+	fmt.Println(Version)
 }
 
 func main() {
-  flag.Usage = func() {
+	flag.Usage = func() {
 		fmt.Printf("Usage: %s [OPTION]... [FILE]...\n", os.Args[0])
-		fmt.Printf("Print or check SHA1, SHA256 and SHA512 hashes for files\n")
+		fmt.Printf("Print or check SHA256 hashes for files\n")
 		fmt.Printf("  -check\n")
 		fmt.Printf("    read hashes from the FILEs and check them\n")
 		fmt.Printf("  -concurrency\n")
@@ -58,37 +57,37 @@ func main() {
 		fmt.Printf("  %s -check /tmp/database.txt\n", os.Args[0])
 	}
 
-  check := flag.Bool("check", false, "")
-  concurrency := flag.Int("concurrency", runtime.NumCPU(), "")
-  version := flag.Bool("version", false, "")
+	check := flag.Bool("check", false, "")
+	concurrency := flag.Int("concurrency", runtime.NumCPU(), "")
+	version := flag.Bool("version", false, "")
 
-  flag.Parse()
+	flag.Parse()
 
-  if flag.NArg() < 1 && !*version {
-    flag.Usage()
-    os.Exit(1)
-  }
+	if flag.NArg() < 1 && !*version {
+		flag.Usage()
+		os.Exit(1)
+	}
 
-  if *check == true {
-    verify()
-  } else if *version == true {
-    printVersion()
-  } else {
-    sem := make(chan bool, *concurrency)
-    for file := range flag.Args() {
-      sem <- true
-      wg.Add(1)
-      go func() {
-        calculate(flag.Arg(file))
-        defer func() {
-          <-sem
-        }()
-      }()
-    }
+	if *check == true {
+		verify()
+	} else if *version == true {
+		printVersion()
+	} else {
+		sem := make(chan bool, *concurrency)
+		for file := range flag.Args() {
+			sem <- true
+			wg.Add(1)
+			go func() {
+				calculate(flag.Arg(file))
+				defer func() {
+					<-sem
+				}()
+			}()
+		}
 
-    for i := 0; i < cap(sem); i++ {
-  		sem <- true
-  	}
-  	wg.Wait()
-  }
+		for i := 0; i < cap(sem); i++ {
+			sem <- true
+		}
+		wg.Wait()
+	}
 }
