@@ -13,6 +13,8 @@ import (
 )
 
 var wg sync.WaitGroup
+
+// Version - variable to store current commit,tag,whatever
 var Version = "No version specified(probably trunk build)"
 
 func calculate(filename string) {
