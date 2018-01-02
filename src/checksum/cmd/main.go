@@ -132,8 +132,8 @@ func main() {
 	}
 
 	fmt.Printf("Job is done:\n")
-	fmt.Printf("  Added: %d", cntAdded)
-	fmt.Printf("  Missed: %d", cntMissed)
-	fmt.Printf("  Failed: %d", cntFailed)
-	fmt.Printf("  Passed: %d", cntPassed)
+	fmt.Printf("  Added: %d\n", cntAdded)
+	fmt.Printf("  Missed: %d\n", cntMissed)
+	fmt.Printf("  Failed: %d\n", cntFailed)
+	fmt.Printf("  Passed: %d\n", cntPassed)
 }
