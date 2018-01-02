@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/fatih/color"
@@ -24,6 +25,11 @@ var Version = "No version specified(probably trunk build)"
 var db *database.Database
 
 var filePattern *regexp.Regexp
+
+var cntAdded uint64
+var cntFailed uint64
+var cntMissed uint64
+var cntPassed uint64
 
 func main() {
 	flag.Usage = func() {
@@ -69,8 +75,6 @@ func main() {
 		log.Fatalf("Error compiling pattern: %s", err)
 	}
 
-	counters := make(map[string]int)
-
 	sem := make(chan bool, *concurrency)
 	for _, file := range db.ListPaths() {
 		sem <- true
@@ -83,7 +87,7 @@ func main() {
 			}
 
 			if _, err := os.Stat(file); os.IsNotExist(err) {
-				counters["Missed"]++
+				atomic.AddUint64(&cntMissed, 1)
 				return
 			}
 
@@ -91,10 +95,10 @@ func main() {
 
 			if res {
 				fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
-				counters["Passed"]++
+				atomic.AddUint64(&cntPassed, 1)
 			} else {
 				fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
-				counters["Failed"]++
+				atomic.AddUint64(&cntFailed, 1)
 			}
 
 			defer func() {
@@ -120,7 +124,7 @@ func main() {
 				Modified: time.Now(),
 			})
 			fmt.Printf("%s %s\n", color.YellowString("[CALCULATED]"), path)
-			counters["Added"]++
+			atomic.AddUint64(&cntAdded, 1)
 		}
 		return nil
 	})
@@ -134,7 +138,8 @@ func main() {
 	}
 
 	fmt.Printf("Job is done:\n")
-	for k, v := range counters {
-		fmt.Printf("  %s: %d\n", k, v)
-	}
+	fmt.Printf("  Added: %d", cntAdded)
+	fmt.Printf("  Missed: %d", cntMissed)
+	fmt.Printf("  Failed: %d", cntFailed)
+	fmt.Printf("  Passed: %d", cntPassed)
 }

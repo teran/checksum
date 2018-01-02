@@ -26,17 +26,11 @@ func sha256file(filename string) string {
 	return fmt.Sprintf("%x", sha256.Sum(nil))
 }
 
-func calculate(filename string) {
-	_ = sha256file(filename)
-
-	wg.Done()
-}
-
 func verify(path string, obj database.Data) bool {
+	defer wg.Done()
+
 	s := sha256file(path)
 	o := obj.Sha256
-
-	wg.Done()
 
 	return s == o
 }

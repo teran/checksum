@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -26,6 +27,8 @@ type Database struct {
 	Schema    Schema
 	IsChanged bool
 }
+
+var mutex = &sync.Mutex{}
 
 // NewDatabase creates new Database object
 func NewDatabase(path string) *Database {
@@ -73,7 +76,9 @@ func (d *Database) ReadOne(path string) (Data, bool) {
 
 // WriteOne writes Data entry for specific file
 func (d *Database) WriteOne(path string, data Data) (Data, bool) {
+	mutex.Lock()
 	d.Schema.Data[path] = data
+	mutex.Unlock()
 	d.IsChanged = true
 
 	_, ok := d.Schema.Data[path]
