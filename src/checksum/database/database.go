@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 // Data is a file object in JSON database
@@ -32,14 +33,14 @@ var mutex = &sync.Mutex{}
 
 // NewDatabase creates new Database object
 func NewDatabase(path string) *Database {
-	log.Printf("Opening database on path=%s", path)
+	fmt.Printf("%s Opening database at %s\n", color.CyanString("[INFO]"), path)
 	database := Database{
 		Path:      path,
 		IsChanged: false,
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Printf("Database on path=%s doesn't exists. Creating a new one with empty scheme: %s", path, err)
+		fmt.Printf("%s Database at %s doesn't exist. Creating a new one\n", color.YellowString("[WARN]"), path)
 		js, err := json.Marshal(Schema{
 			Data: make(map[string]Data),
 		})

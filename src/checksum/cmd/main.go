@@ -111,7 +111,7 @@ func main() {
 	}
 	wg.Wait()
 
-	log.Printf("First pass done. Starting filewalk on path: %s", *datadir)
+	fmt.Printf("%s First pass done. Starting filewalk on %s\n", color.CyanString("[INFO]"), *datadir)
 
 	err = filepath.Walk(*datadir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
@@ -136,6 +136,7 @@ func main() {
 		panic(fmt.Sprintf("Error commiting the data: %s", err))
 	}
 
+	fmt.Printf("------------\n")
 	fmt.Printf("Job is done:\n")
 	fmt.Printf("  Added: %d\n", cntAdded)
 	fmt.Printf("  Missed: %d\n", cntMissed)
