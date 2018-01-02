@@ -43,6 +43,8 @@ func main() {
 		fmt.Printf("    Specify data directory\n")
 		fmt.Printf("  -pattern <string>\n")
 		fmt.Printf("    Pattern to match files in filewalk mode(default is `.(ar2|arw|cr2|crw|nef)$`)\n")
+		fmt.Printf("  -skipok\n")
+		fmt.Printf("    Skip OK verification results from output")
 		fmt.Printf("  -version\n")
 		fmt.Printf("    Print checksum version\n\n")
 		fmt.Printf("Examples:\n")
@@ -54,6 +56,7 @@ func main() {
 	datadir := flag.String("datadir", "", "")
 	dbPath := flag.String("database", "", "")
 	pattern := flag.String("pattern", ".(ar2|arw|cr2|crw|nef)$", "")
+	skipok := flag.Bool("skipok", false, "")
 
 	flag.Parse()
 
@@ -88,7 +91,9 @@ func main() {
 			res := verify(file, obj.Sha256)
 
 			if res {
-				fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
+				if !*skipok {
+					fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
+				}
 				atomic.AddUint64(&cntPassed, 1)
 			} else {
 				fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
