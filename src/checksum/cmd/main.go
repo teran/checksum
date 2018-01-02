@@ -44,7 +44,7 @@ func main() {
 		fmt.Printf("  -pattern <string>\n")
 		fmt.Printf("    Pattern to match files in filewalk mode(default is `.(ar2|arw|cr2|crw|nef)$`)\n")
 		fmt.Printf("  -skipok\n")
-		fmt.Printf("    Skip OK verification results from output")
+		fmt.Printf("    Skip OK verification results from output\n")
 		fmt.Printf("  -version\n")
 		fmt.Printf("    Print checksum version\n\n")
 		fmt.Printf("Examples:\n")
