@@ -6,9 +6,12 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/fatih/color"
 
 	"checksum/database"
 )
@@ -20,44 +23,53 @@ var Version = "No version specified(probably trunk build)"
 
 var db *database.Database
 
+var filePattern *regexp.Regexp
+
 func main() {
 	flag.Usage = func() {
-		fmt.Printf("Usage: %s [OPTION]... [FILE]...\n", os.Args[0])
-		fmt.Println("  -database")
-		fmt.Println("    Specify database path")
-		fmt.Println("  -datadir")
-		fmt.Println("    Specify data directory")
-		// fmt.Printf("Print or check SHA256 hashes for files\n")
-		// fmt.Printf("  -check\n")
-		// fmt.Printf("    read hashes from the FILEs and check them\n")
-		// fmt.Printf("  -concurrency\n")
-		// fmt.Printf("    Amount of routines to spawn at the same time(%v by default for your system)\n", runtime.NumCPU())
-		// fmt.Printf("  -version\n")
-		// fmt.Printf("    Print checksum version\n\n")
-		// fmt.Printf("Examples:\n")
-		// fmt.Printf("  %s file.iso\n", os.Args[0])
-		// fmt.Printf("  %s file.jpg | tee /tmp/database.txt\n", os.Args[0])
-		// fmt.Printf("  %s -check /tmp/database.txt\n", os.Args[0])
+		fmt.Printf("Usage: %s [OPTION]...\n", os.Args[0])
+		fmt.Printf("OPTIONS:\n")
+		fmt.Printf("  -concurrency <int>\n")
+		fmt.Printf("    Amount of routines to spawn at the same time for checksum verification(%v by default for your system)\n", runtime.NumCPU())
+		fmt.Printf("  -database <string>\n")
+		fmt.Printf("    Specify database path\n")
+		fmt.Printf("  -datadir <string>\n")
+		fmt.Printf("    Specify data directory\n")
+		fmt.Printf("  -pattern <string>\n")
+		fmt.Printf("    Pattern to match files in filewalk mode(default is `.(ar2|arw|cr2|crw|nef)$`)\n")
+		fmt.Printf("  -version\n")
+		fmt.Printf("    Print checksum version\n\n")
+		fmt.Printf("Examples:\n")
+		fmt.Printf("  %s -database /tmp/db.json -datadir /Volumes/Storage/Photos\n", os.Args[0])
 	}
 
 	concurrency := flag.Int("concurrency", runtime.NumCPU(), "")
 	version := flag.Bool("version", false, "")
 	datadir := flag.String("datadir", "", "")
 	dbPath := flag.String("database", "", "")
+	pattern := flag.String("pattern", ".(ar2|arw|cr2|crw|nef)$", "")
 
 	flag.Parse()
 
-	db = database.NewDatabase(*dbPath)
-
-	// if flag.NArg() < 1 && !*version {
-	//	flag.Usage()
-	//	os.Exit(1)
-	// }
+	if (*datadir == "" || *dbPath == "") && !*version {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	if *version == true {
 		printVersion()
 		return
 	}
+
+	var err error
+
+	db = database.NewDatabase(*dbPath)
+	filePattern, err = regexp.Compile(*pattern)
+	if err != nil {
+		log.Fatalf("Error compiling pattern: %s", err)
+	}
+
+	counters := make(map[string]int)
 
 	sem := make(chan bool, *concurrency)
 	for _, file := range db.ListPaths() {
@@ -69,12 +81,20 @@ func main() {
 				log.Println("Error retrieving entry for file %s", file)
 				return
 			}
+
+			if _, err := os.Stat(file); os.IsNotExist(err) {
+				counters["Missed"]++
+				return
+			}
+
 			res := verify(file, obj)
 
 			if res {
-				fmt.Printf("[ OK ] %s\n", file)
+				fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
+				counters["Passed"]++
 			} else {
-				fmt.Printf("[FAIL] %s\n", file)
+				fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
+				counters["Failed"]++
 			}
 
 			defer func() {
@@ -90,16 +110,17 @@ func main() {
 
 	log.Printf("First pass done. Starting filewalk on path: %s", *datadir)
 
-	err := filepath.Walk(*datadir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(*datadir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
-		if filepath.Ext(path) == ".cr2" || filepath.Ext(path) == ".nef" || filepath.Ext(path) == ".html" {
+		if isApplicable(path) {
 			db.WriteOne(path, database.Data{
 				Sha256:   sha256file(path),
 				Modified: time.Now(),
 			})
-			fmt.Printf("[CALCULATED] %s\n", path)
+			fmt.Printf("%s %s\n", color.YellowString("[CALCULATED]"), path)
+			counters["Added"]++
 		}
 		return nil
 	})
@@ -107,5 +128,13 @@ func main() {
 		panic(fmt.Sprintf("Error walking through files: %s", err))
 	}
 
-	db.Commit()
+	err = db.Commit()
+	if err != nil {
+		panic(fmt.Sprintf("Error commiting the data: %s", err))
+	}
+
+	fmt.Printf("Job is done:\n")
+	for k, v := range counters {
+		fmt.Printf("  %s: %s", k, v)
+	}
 }

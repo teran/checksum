@@ -22,15 +22,17 @@ type Schema struct {
 
 // Database object struct
 type Database struct {
-	Path   string
-	Schema Schema
+	Path      string
+	Schema    Schema
+	IsChanged bool
 }
 
 // NewDatabase creates new Database object
 func NewDatabase(path string) *Database {
 	log.Printf("Opening database on path=%s", path)
 	database := Database{
-		Path: path,
+		Path:      path,
+		IsChanged: false,
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -72,6 +74,8 @@ func (d *Database) ReadOne(path string) (Data, bool) {
 // WriteOne writes Data entry for specific file
 func (d *Database) WriteOne(path string, data Data) (Data, bool) {
 	d.Schema.Data[path] = data
+	d.IsChanged = true
+
 	_, ok := d.Schema.Data[path]
 	return data, ok
 }
@@ -93,6 +97,10 @@ func (d *Database) ListPaths() []string {
 
 // Commit writes all the in-mem changes to disk
 func (d *Database) Commit() error {
+	if !d.IsChanged {
+		return nil
+	}
+
 	js, err := json.Marshal(d.Schema)
 	if err != nil {
 		return err

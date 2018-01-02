@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	"checksum/database"
 )
@@ -35,6 +36,8 @@ func verify(path string, obj database.Data) bool {
 	s := sha256file(path)
 	o := obj.Sha256
 
+	wg.Done()
+
 	return s == o
 }
 
@@ -42,5 +45,10 @@ func printVersion() {
 	fmt.Println(Version)
 }
 
-func calculateByPath(path string) {
+func isApplicable(path string) bool {
+	_, ok := db.ReadOne(path)
+	if filePattern.MatchString(filepath.Ext(path)) && !ok {
+		return true
+	}
+	return false
 }
