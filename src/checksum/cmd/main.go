@@ -83,6 +83,10 @@ func main() {
 		sem <- true
 		wg.Add(1)
 		go func() {
+			defer func() {
+				<-sem
+			}()
+
 			if _, err := os.Stat(file); os.IsNotExist(err) {
 				atomic.AddUint64(&cntMissed, 1)
 				return
@@ -95,14 +99,10 @@ func main() {
 					fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
 				}
 				atomic.AddUint64(&cntPassed, 1)
-			} else {
-				fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
-				atomic.AddUint64(&cntFailed, 1)
+				return
 			}
-
-			defer func() {
-				<-sem
-			}()
+			fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
+			atomic.AddUint64(&cntFailed, 1)
 		}()
 	}
 
