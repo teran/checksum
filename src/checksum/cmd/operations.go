@@ -7,8 +7,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
-	"checksum/database"
 )
 
 func sha256file(filename string) string {
@@ -26,13 +24,12 @@ func sha256file(filename string) string {
 	return fmt.Sprintf("%x", sha256.Sum(nil))
 }
 
-func verify(path string, obj database.Data) bool {
+func verify(path string, sha256 string) bool {
 	defer wg.Done()
 
 	s := sha256file(path)
-	o := obj.Sha256
 
-	return s == o
+	return s == sha256
 }
 
 func printVersion() {

@@ -77,8 +77,8 @@ func (d *Database) ReadOne(path string) (Data, bool) {
 // WriteOne writes Data entry for specific file
 func (d *Database) WriteOne(path string, data Data) (Data, bool) {
 	mutex.Lock()
+	defer mutex.Unlock()
 	d.Schema.Data[path] = data
-	mutex.Unlock()
 	d.IsChanged = true
 
 	_, ok := d.Schema.Data[path]
@@ -100,8 +100,15 @@ func (d *Database) ListPaths() []string {
 	return keys
 }
 
+// MapObjects Returns objects map
+func (d *Database) MapObjects() map[string]Data {
+	return d.Schema.Data
+}
+
 // Commit writes all the in-mem changes to disk
 func (d *Database) Commit() error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	if !d.IsChanged {
 		return nil
 	}

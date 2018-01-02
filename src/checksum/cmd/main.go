@@ -74,24 +74,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error compiling pattern: %s", err)
 	}
-
 	sem := make(chan bool, *concurrency)
-	for _, file := range db.ListPaths() {
+
+	for file, obj := range db.MapObjects() {
 		sem <- true
 		wg.Add(1)
 		go func() {
-			obj, ok := db.ReadOne(file)
-			if !ok {
-				log.Println("Error retrieving entry for file %s", file)
-				return
-			}
-
 			if _, err := os.Stat(file); os.IsNotExist(err) {
 				atomic.AddUint64(&cntMissed, 1)
 				return
 			}
 
-			res := verify(file, obj)
+			res := verify(file, obj.Sha256)
 
 			if res {
 				fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
