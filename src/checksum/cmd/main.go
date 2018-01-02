@@ -82,7 +82,7 @@ func main() {
 	for file, obj := range db.MapObjects() {
 		sem <- true
 		wg.Add(1)
-		go func() {
+		go func(file string, obj database.Data) {
 			defer func() {
 				<-sem
 			}()
@@ -103,7 +103,7 @@ func main() {
 			}
 			fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
 			atomic.AddUint64(&cntFailed, 1)
-		}()
+		}(file, obj)
 	}
 
 	for i := 0; i < cap(sem); i++ {
