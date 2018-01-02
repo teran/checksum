@@ -135,6 +135,6 @@ func main() {
 
 	fmt.Printf("Job is done:\n")
 	for k, v := range counters {
-		fmt.Printf("  %s: %s", k, v)
+		fmt.Printf("  %s: %d\n", k, v)
 	}
 }
