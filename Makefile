@@ -48,6 +48,9 @@ sign:
 	gpg --detach-sign --digest-algo SHA512 --no-tty --batch --output bin/checksum-windows-amd64.exe.sig 	bin/checksum-windows-amd64.exe
 	gpg --detach-sign --digest-algo SHA512 --no-tty --batch --output bin/checksum-windows-i386.exe.sig 		bin/checksum-windows-i386.exe
 
+test:
+	go test ./src/...
+
 verify:
 	gpg --verify bin/checksum-darwin-amd64.sig 				bin/checksum-darwin-amd64
 	gpg --verify bin/checksum-darwin-i386.sig 				bin/checksum-darwin-i386
