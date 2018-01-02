@@ -42,7 +42,7 @@ func main() {
 		fmt.Printf("  -datadir <string>\n")
 		fmt.Printf("    Specify data directory\n")
 		fmt.Printf("  -pattern <string>\n")
-		fmt.Printf("    Pattern to match files in filewalk mode(default is `.(ar2|arw|cr2|crw|nef)$`)\n")
+		fmt.Printf("    Pattern to match files in filewalk mode(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)\n")
 		fmt.Printf("  -skipok\n")
 		fmt.Printf("    Skip OK verification results from output\n")
 		fmt.Printf("  -version\n")
@@ -55,7 +55,7 @@ func main() {
 	version := flag.Bool("version", false, "")
 	datadir := flag.String("datadir", "", "")
 	dbPath := flag.String("database", "", "")
-	pattern := flag.String("pattern", ".(ar2|arw|cr2|crw|nef)$", "")
+	pattern := flag.String("pattern", ".(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$", "")
 	skipok := flag.Bool("skipok", false, "")
 
 	flag.Parse()
