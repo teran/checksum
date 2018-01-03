@@ -1,7 +1,7 @@
 class Checksum < Formula
   desc "SHA256 file verification for consistency check purposes"
   homepage "https://github.com/teran/checksum"
-  version "0.3"
+  version "0.4"
   url "https://github.com/teran/checksum/archive/v#{version}.tar.gz"
   sha256 "fc5fc5f79b569067847fa420a19383a571dcc33b2e2c61d2413ed47afec1cc28"
 
