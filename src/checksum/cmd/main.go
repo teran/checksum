@@ -43,6 +43,10 @@ func main() {
 		fmt.Printf("    Specify data directory\n")
 		fmt.Printf("  -pattern <string>\n")
 		fmt.Printf("    Pattern to match files in filewalk mode(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)\n")
+		fmt.Printf("  -skipfailed\n")
+		fmt.Printf("    Skip FAIL verification results from output\n")
+		fmt.Printf("  -skipmissed\n")
+		fmt.Printf("    Skip MISS verification results from output\n")
 		fmt.Printf("  -skipok\n")
 		fmt.Printf("    Skip OK verification results from output\n")
 		fmt.Printf("  -version\n")
@@ -56,6 +60,8 @@ func main() {
 	datadir := flag.String("datadir", "", "")
 	dbPath := flag.String("database", "", "")
 	pattern := flag.String("pattern", ".(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$", "")
+	skipfailed := flag.Bool("skipfailed", false, "")
+	skipmissed := flag.Bool("skipmissed", false, "")
 	skipok := flag.Bool("skipok", false, "")
 
 	flag.Parse()
@@ -89,6 +95,9 @@ func main() {
 			defer wg.Done()
 
 			if _, err := os.Stat(file); os.IsNotExist(err) {
+				if !*skipmissed {
+					fmt.Printf("%s %s\n", color.RedString("[MISS]"), file)
+				}
 				atomic.AddUint64(&cntMissed, 1)
 				return
 			}
@@ -102,7 +111,9 @@ func main() {
 				atomic.AddUint64(&cntPassed, 1)
 				return
 			}
-			fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
+			if !*skipfailed {
+				fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
+			}
 			atomic.AddUint64(&cntFailed, 1)
 		}(file, obj)
 	}
