@@ -16,6 +16,18 @@ checkum automatically:
  * adds new
  * report about fails and misses
 
+How to install
+--------------
+
+macOS with Homebrew:
+```
+brew install https://raw.githubusercontent.com/teran/checksum/master/contrib/Homebrew/checksum.rb
+```
+
+Other distros:
+
+just refer to releases page and download appropriate binary for your platform
+
 Usage
 -----
 

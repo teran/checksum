@@ -1,7 +1,7 @@
 export GOPATH := $(PWD)
 export GOBIN := $(GOPATH)/bin
 export PACKAGES := $(shell env GOPATH=$(GOPATH) go list ./src/checksum/...)
-export REVISION := $(shell git describe --exact-match --tags $(git log -n1 --pretty='%h') || git rev-parse --verify --short HEAD)
+export REVISION := $(shell git describe --exact-match --tags $(git log -n1 --pretty='%h') || git rev-parse --verify --short HEAD || echo ${REVISION})
 
 all: clean predependencies dependencies build
 
