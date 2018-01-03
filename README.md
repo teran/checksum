@@ -32,7 +32,7 @@ Usage
 -----
 
 ```
-Usage: ./bin/checksum-darwin-amd64 [OPTION]...
+Usage: checksum [OPTION]...
 OPTIONS:
   -concurrency <int>
     Amount of routines to spawn at the same time for checksum verification(8 by default for your system)
@@ -41,10 +41,16 @@ OPTIONS:
   -datadir <string>
     Specify data directory
   -pattern <string>
-    Pattern to match files in filewalk mode(default is `.(ar2|arw|cr2|crw|nef)$`)
+    Pattern to match files in filewalk mode(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)
+  -skipfailed
+    Skip FAIL verification results from output
+  -skipmissed
+    Skip MISS verification results from output
+  -skipok
+    Skip OK verification results from output
   -version
     Print checksum version
 
 Examples:
-  ./bin/checksum-darwin-amd64 -database /tmp/db.json -datadir /Volumes/Storage/Photos
+  checksum -database /tmp/db.json -datadir /Volumes/Storage/Photos
 ```
