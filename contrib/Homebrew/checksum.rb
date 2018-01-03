@@ -3,7 +3,7 @@ class Checksum < Formula
   homepage "https://github.com/teran/checksum"
   version "0.4"
   url "https://github.com/teran/checksum/archive/v#{version}.tar.gz"
-  sha256 "fc5fc5f79b569067847fa420a19383a571dcc33b2e2c61d2413ed47afec1cc28"
+  sha256 "085cc8a0feba7eb3341a7476692c5edf4136a2463f93f305be620a5687705d2a"
 
   depends_on "go" => :build
   depends_on "make" => :build
