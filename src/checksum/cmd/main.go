@@ -86,6 +86,7 @@ func main() {
 			defer func() {
 				<-sem
 			}()
+			defer wg.Done()
 
 			if _, err := os.Stat(file); os.IsNotExist(err) {
 				atomic.AddUint64(&cntMissed, 1)

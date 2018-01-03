@@ -25,8 +25,6 @@ func sha256file(filename string) string {
 }
 
 func verify(path string, sha256 string) bool {
-	defer wg.Done()
-
 	s := sha256file(path)
 
 	return s == sha256
