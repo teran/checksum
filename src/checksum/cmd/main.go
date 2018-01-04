@@ -42,7 +42,7 @@ func main() {
 		fmt.Printf("  -datadir <string>\n")
 		fmt.Printf("    Specify data directory\n")
 		fmt.Printf("  -pattern <string>\n")
-		fmt.Printf("    Pattern to match files in filewalk mode(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)\n")
+		fmt.Printf("    Pattern to match filenames which checking for new files(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)\n")
 		fmt.Printf("  -skipfailed\n")
 		fmt.Printf("    Skip FAIL verification results from output\n")
 		fmt.Printf("  -skipmissed\n")
@@ -123,7 +123,7 @@ func main() {
 	}
 	wg.Wait()
 
-	fmt.Printf("%s First pass done. Starting filewalk on %s\n", color.CyanString("[INFO]"), *datadir)
+	fmt.Printf("%s Verification step complete. Checking for new files on %s\n", color.CyanString("[INFO]"), *datadir)
 
 	err = filepath.Walk(*datadir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
