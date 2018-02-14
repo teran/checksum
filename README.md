@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fteran%2Fchecksum.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fteran%2Fchecksum?ref=badge_shield)
+
 checksum
 ========
 
@@ -54,3 +56,7 @@ OPTIONS:
 Examples:
   checksum -database /tmp/db.json -datadir /Volumes/Storage/Photos
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fteran%2Fchecksum.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fteran%2Fchecksum?ref=badge_large)
