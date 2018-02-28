@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 func sha256file(filename string) string {
@@ -31,7 +32,8 @@ func verify(path string, sha256 string) bool {
 }
 
 func printVersion() {
-	fmt.Println(Version)
+	fmt.Printf("checksum version: %s\n", Version)
+	fmt.Printf("Built wih Go version: %s\n", runtime.Version())
 }
 
 func isApplicable(path string) bool {

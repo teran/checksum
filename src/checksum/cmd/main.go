@@ -50,7 +50,7 @@ func main() {
 		fmt.Printf("  -skipok\n")
 		fmt.Printf("    Skip OK verification results from output\n")
 		fmt.Printf("  -version\n")
-		fmt.Printf("    Print checksum version\n\n")
+		fmt.Printf("    Print application and Golang versions\n\n")
 		fmt.Printf("Examples:\n")
 		fmt.Printf("  %s -database /tmp/db.json -datadir /Volumes/Storage/Photos\n", os.Args[0])
 	}
