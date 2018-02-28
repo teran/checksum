@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"gopkg.in/cheggaaa/pb.v1"
 
 	"checksum/database"
 )
@@ -26,10 +27,12 @@ var db *database.Database
 
 var filePattern *regexp.Regexp
 
-var cntAdded uint64
-var cntFailed uint64
-var cntMissed uint64
-var cntPassed uint64
+var (
+	cntAdded  uint64
+	cntFailed uint64
+	cntMissed uint64
+	cntPassed uint64
+)
 
 func main() {
 	flag.Usage = func() {
@@ -43,6 +46,8 @@ func main() {
 		fmt.Printf("    Specify data directory\n")
 		fmt.Printf("  -pattern <string>\n")
 		fmt.Printf("    Pattern to match filenames which checking for new files(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)\n")
+		fmt.Printf("  -progressbar\n")
+		fmt.Printf("    Show progress bar instead of printing handled files(the same as `-skipfailed`, `-skipmissed`, `-skipok` but with pretty progress bar)")
 		fmt.Printf("  -skipfailed\n")
 		fmt.Printf("    Skip FAIL verification results from output\n")
 		fmt.Printf("  -skipmissed\n")
@@ -63,6 +68,7 @@ func main() {
 	skipfailed := flag.Bool("skipfailed", false, "")
 	skipmissed := flag.Bool("skipmissed", false, "")
 	skipok := flag.Bool("skipok", false, "")
+	progressbar := flag.Bool("progressbar", false, "")
 
 	flag.Parse()
 
@@ -76,6 +82,12 @@ func main() {
 		return
 	}
 
+	if *progressbar == true {
+		*skipfailed = true
+		*skipmissed = true
+		*skipok = true
+	}
+
 	var err error
 
 	db = database.NewDatabase(*dbPath)
@@ -84,11 +96,27 @@ func main() {
 		log.Fatalf("Error compiling pattern: %s", err)
 	}
 	sem := make(chan bool, *concurrency)
+	var bar *pb.ProgressBar
+	if *progressbar {
+		bar = pb.New(db.Count())
+		bar.ShowCounters = true
+		bar.SetRefreshRate(time.Second)
+		bar.ShowPercent = true
+		bar.ShowBar = true
+		bar.ShowTimeLeft = true
+		bar.ShowSpeed = true
+		bar.Start()
+	}
 
 	for file, obj := range db.MapObjects() {
 		sem <- true
 		wg.Add(1)
 		go func(file string, obj database.Data) {
+			if *progressbar {
+				defer func() {
+					bar.Increment()
+				}()
+			}
 			defer func() {
 				<-sem
 			}()
@@ -122,6 +150,10 @@ func main() {
 		sem <- true
 	}
 	wg.Wait()
+
+	if *progressbar {
+		bar.Finish()
+	}
 
 	fmt.Printf("%s Verification step complete. Checking for new files on %s\n", color.CyanString("[INFO]"), *datadir)
 
