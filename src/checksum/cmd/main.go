@@ -61,6 +61,7 @@ func main() {
 	}
 
 	concurrency := flag.Int("concurrency", runtime.NumCPU(), "")
+	complete := flag.Bool("complete", false, "")
 	version := flag.Bool("version", false, "")
 	datadir := flag.String("datadir", "", "")
 	dbPath := flag.String("database", "", "")
@@ -72,14 +73,19 @@ func main() {
 
 	flag.Parse()
 
-	if (*datadir == "" || *dbPath == "") && !*version {
-		flag.Usage()
-		os.Exit(1)
-	}
-
 	if *version == true {
 		printVersion()
 		return
+	}
+
+	if *complete == true {
+		completeArgs(flag.Arg(1))
+		return
+	}
+
+	if *datadir == "" || *dbPath == "" {
+		flag.Usage()
+		os.Exit(1)
 	}
 
 	if *progressbar == true {

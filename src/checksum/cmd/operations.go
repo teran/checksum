@@ -8,7 +8,22 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
+
+func completeArgs(word string) {
+	fmt.Println(strings.Join([]string{
+		"-concurrency",
+		"-database",
+		"-datadir",
+		"-pattern",
+		"-progressbar",
+		"-skipfailed",
+		"-skipmissed",
+		"-skipok",
+		"-version",
+	}, " "))
+}
 
 func sha256file(filename string) string {
 	fp, err := os.Open(filename)
