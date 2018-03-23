@@ -47,7 +47,7 @@ func main() {
 		fmt.Printf("  -pattern <string>\n")
 		fmt.Printf("    Pattern to match filenames which checking for new files(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)\n")
 		fmt.Printf("  -progressbar\n")
-		fmt.Printf("    Show progress bar instead of printing handled files(the same as `-skipfailed`, `-skipmissed`, `-skipok` but with pretty progress bar)")
+		fmt.Printf("    Show progress bar instead of printing handled files(the same as `-skipfailed`, `-skipmissed`, `-skipok` but with pretty progress bar)\n")
 		fmt.Printf("  -skipfailed\n")
 		fmt.Printf("    Skip FAIL verification results from output\n")
 		fmt.Printf("  -skipmissed\n")
