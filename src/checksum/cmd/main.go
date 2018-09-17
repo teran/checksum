@@ -44,6 +44,8 @@ func main() {
 		fmt.Printf("    Specify database path\n")
 		fmt.Printf("  -datadir <string>\n")
 		fmt.Printf("    Specify data directory\n")
+		fmt.Printf("  -generate-checksum-only\n")
+		fmt.Printf("    Skip step of file verification and only check for new files and generate checksums for them\n")
 		fmt.Printf("  -pattern <string>\n")
 		fmt.Printf("    Pattern to match filenames which checking for new files(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)\n")
 		fmt.Printf("  -progressbar\n")
@@ -65,6 +67,7 @@ func main() {
 	version := flag.Bool("version", false, "")
 	datadir := flag.String("datadir", "", "")
 	dbPath := flag.String("database", "", "")
+	generateChecksumOnly := flag.Bool("generate-checksum-only", false, "")
 	pattern := flag.String("pattern", ".(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$", "")
 	skipfailed := flag.Bool("skipfailed", false, "")
 	skipmissed := flag.Bool("skipmissed", false, "")
@@ -101,67 +104,70 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error compiling pattern: %s", err)
 	}
-	sem := make(chan bool, *concurrency)
-	var bar *pb.ProgressBar
-	if *progressbar {
-		bar = pb.New(db.Count())
-		bar.ShowCounters = true
-		bar.SetRefreshRate(time.Second)
-		bar.ShowPercent = true
-		bar.ShowBar = true
-		bar.ShowTimeLeft = true
-		bar.ShowSpeed = true
-		bar.Start()
-	}
 
-	for file, obj := range db.MapObjects() {
-		sem <- true
-		wg.Add(1)
-		go func(file string, obj database.Data) {
-			if *progressbar {
+	if !*generateChecksumOnly {
+		sem := make(chan bool, *concurrency)
+		var bar *pb.ProgressBar
+		if *progressbar {
+			bar = pb.New(db.Count())
+			bar.ShowCounters = true
+			bar.SetRefreshRate(time.Second)
+			bar.ShowPercent = true
+			bar.ShowBar = true
+			bar.ShowTimeLeft = true
+			bar.ShowSpeed = true
+			bar.Start()
+		}
+
+		for file, obj := range db.MapObjects() {
+			sem <- true
+			wg.Add(1)
+			go func(file string, obj database.Data) {
+				if *progressbar {
+					defer func() {
+						bar.Increment()
+					}()
+				}
 				defer func() {
-					bar.Increment()
+					<-sem
 				}()
-			}
-			defer func() {
-				<-sem
-			}()
-			defer wg.Done()
+				defer wg.Done()
 
-			if _, err := os.Stat(file); os.IsNotExist(err) {
-				if !*skipmissed {
-					fmt.Printf("%s %s\n", color.RedString("[MISS]"), file)
+				if _, err := os.Stat(file); os.IsNotExist(err) {
+					if !*skipmissed {
+						fmt.Printf("%s %s\n", color.RedString("[MISS]"), file)
+					}
+					atomic.AddUint64(&cntMissed, 1)
+					return
 				}
-				atomic.AddUint64(&cntMissed, 1)
-				return
-			}
 
-			res := verify(file, obj.Sha256)
+				res := verify(file, obj.Sha256)
 
-			if res {
-				if !*skipok {
-					fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
+				if res {
+					if !*skipok {
+						fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
+					}
+					atomic.AddUint64(&cntPassed, 1)
+					return
 				}
-				atomic.AddUint64(&cntPassed, 1)
-				return
-			}
-			if !*skipfailed {
-				fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
-			}
-			atomic.AddUint64(&cntFailed, 1)
-		}(file, obj)
-	}
+				if !*skipfailed {
+					fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
+				}
+				atomic.AddUint64(&cntFailed, 1)
+			}(file, obj)
+		}
 
-	for i := 0; i < cap(sem); i++ {
-		sem <- true
-	}
-	wg.Wait()
+		for i := 0; i < cap(sem); i++ {
+			sem <- true
+		}
+		wg.Wait()
 
-	if *progressbar {
-		bar.Finish()
-	}
+		if *progressbar {
+			bar.Finish()
+		}
 
-	fmt.Printf("%s Verification step complete. Checking for new files on %s\n", color.CyanString("[INFO]"), *datadir)
+		fmt.Printf("%s Verification step complete. Checking for new files on %s\n", color.CyanString("[INFO]"), *datadir)
+	}
 
 	err = filepath.Walk(*datadir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
