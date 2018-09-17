@@ -24,6 +24,11 @@ macOS with Homebrew:
 brew install https://raw.githubusercontent.com/teran/checksum/master/contrib/Homebrew/checksum.rb
 ```
 
+or to upgrade:
+```
+brew upgrade https://raw.githubusercontent.com/teran/checksum/master/contrib/Homebrew/checksum.rb
+```
+
 Other distros:
 
 just refer to releases page and download appropriate binary for your platform
