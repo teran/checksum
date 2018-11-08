@@ -1,9 +1,9 @@
 class Checksum < Formula
   desc "SHA256 file verification for consistency check purposes"
   homepage "https://github.com/teran/checksum"
-  version "0.6"
+  version "0.7"
   url "https://github.com/teran/checksum/archive/v#{version}.tar.gz"
-  sha256 "0f77ac41bf42c9566f4a3e907de74898c2bfeb80449cefd4ef25c1252a875467"
+  sha256 "c060b880eced2fe69e376fec65aa45f87fbc81aa086dabc2291c2ba8de585aef"
 
   depends_on "go" => :build
   depends_on "make" => :build
