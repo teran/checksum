@@ -18,16 +18,16 @@ import (
 	"checksum/database"
 )
 
-var wg sync.WaitGroup
-
-// Version - variable to store current commit,tag,whatever
-var Version = "No version specified(probably trunk build)"
-
-var db *database.Database
-
-var filePattern *regexp.Regexp
-
 var (
+	wg sync.WaitGroup
+
+	// Version - variable to store current commit,tag,whatever
+	Version = "No version specified(probably trunk build)"
+
+	db             *database.Database
+	filePattern    *regexp.Regexp
+	rawFilePattern = ".(3fr|ari|arw|bay|crw|cr2|cr3|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$"
+
 	cntAdded  uint64
 	cntFailed uint64
 	cntMissed uint64
@@ -47,7 +47,7 @@ func main() {
 		fmt.Printf("  -generate-checksum-only\n")
 		fmt.Printf("    Skip step of file verification and only check for new files and generate checksums for them\n")
 		fmt.Printf("  -pattern <string>\n")
-		fmt.Printf("    Pattern to match filenames which checking for new files(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)\n")
+		fmt.Printf("    Pattern to match filenames which checking for new files(default is `" + rawFilePattern + "`)\n")
 		fmt.Printf("  -progressbar\n")
 		fmt.Printf("    Show progress bar instead of printing handled files(the same as `-skipfailed`, `-skipmissed`, `-skipok` but with pretty progress bar)\n")
 		fmt.Printf("  -skipfailed\n")
@@ -68,7 +68,7 @@ func main() {
 	datadir := flag.String("datadir", "", "")
 	dbPath := flag.String("database", "", "")
 	generateChecksumOnly := flag.Bool("generate-checksum-only", false, "")
-	pattern := flag.String("pattern", ".(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$", "")
+	pattern := flag.String("pattern", rawFilePattern, "")
 	skipfailed := flag.Bool("skipfailed", false, "")
 	skipmissed := flag.Bool("skipmissed", false, "")
 	skipok := flag.Bool("skipok", false, "")

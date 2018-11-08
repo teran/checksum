@@ -37,7 +37,7 @@ Usage
 -----
 
 ```
-Usage: checksum [OPTION]...
+Usage: ./bin/checksum-darwin-amd64 [OPTION]...
 OPTIONS:
   -concurrency <int>
     Amount of routines to spawn at the same time for checksum verification(8 by default for your system)
@@ -45,8 +45,12 @@ OPTIONS:
     Specify database path
   -datadir <string>
     Specify data directory
+  -generate-checksum-only
+    Skip step of file verification and only check for new files and generate checksums for them
   -pattern <string>
-    Pattern to match files in filewalk mode(default is `.(3fr|ari|arw|bay|crw|cr2|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)
+    Pattern to match filenames which checking for new files(default is `.(3fr|ari|arw|bay|crw|cr2|cr3|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`)
+  -progressbar
+    Show progress bar instead of printing handled files(the same as `-skipfailed`, `-skipmissed`, `-skipok` but with pretty progress bar)
   -skipfailed
     Skip FAIL verification results from output
   -skipmissed
@@ -54,8 +58,8 @@ OPTIONS:
   -skipok
     Skip OK verification results from output
   -version
-    Print checksum version
+    Print application and Golang versions
 
 Examples:
-  checksum -database /tmp/db.json -datadir /Volumes/Storage/Photos
+  ./bin/checksum-darwin-amd64 -database /tmp/db.json -datadir /Volumes/Storage/Photos
 ```
