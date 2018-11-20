@@ -16,7 +16,12 @@ func TestDatabase(t *testing.T) {
 
 	d := NewDatabase(tmpfile.Name())
 
-	dataObject := Data{Modified: time.Now(), Sha256: "deadbeaf"}
+	dataObject := Data{
+		Modified: time.Now(),
+		Length:   10,
+		SHA1:     "deadbeaf",
+		SHA256:   "deadbeaf",
+	}
 
 	_, ok := d.WriteOne("testPath", dataObject)
 	if !ok {
@@ -43,7 +48,15 @@ func TestDatabase(t *testing.T) {
 		t.Errorf("Error reported invoking ReadOne on flushed database")
 	}
 
-	if do.Sha256 != dataObject.Sha256 {
-		t.Errorf("Saved object differs from it's origin: %#v != %#v", dataObject, do)
+	if do.Length != dataObject.Length {
+		t.Errorf("Saved object differs with Length from it's origin: %#v != %#v", dataObject, do)
+	}
+
+	if do.SHA1 != dataObject.SHA1 {
+		t.Errorf("Saved object differs with SHA1 from it's origin: %#v != %#v", dataObject, do)
+	}
+
+	if do.SHA256 != dataObject.SHA256 {
+		t.Errorf("Saved object differs with SHA256 from it's origin: %#v != %#v", dataObject, do)
 	}
 }

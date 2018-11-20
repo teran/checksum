@@ -141,7 +141,33 @@ func main() {
 					return
 				}
 
-				res := verify(file, obj.Sha256)
+				isChanged := false
+
+				if obj.Length == 0 {
+					obj.Length = flength(file)
+					isChanged = true
+				}
+
+				if obj.SHA1 == "" {
+					obj.SHA1 = sha1file(file)
+					isChanged = true
+				}
+
+				if obj.SHA256 == "" {
+					obj.SHA256 = sha256file(file)
+					isChanged = true
+				}
+
+				res := verify(file, obj.Length, obj.SHA1, obj.SHA256)
+
+				if isChanged {
+					db.WriteOne(file, database.Data{
+						Length:   obj.Length,
+						SHA1:     obj.SHA1,
+						SHA256:   obj.SHA256,
+						Modified: time.Now().UTC(),
+					})
+				}
 
 				if res {
 					if !*skipok {
@@ -175,8 +201,10 @@ func main() {
 		}
 		if isApplicable(path) {
 			db.WriteOne(path, database.Data{
-				Sha256:   sha256file(path),
-				Modified: time.Now(),
+				Length:   flength(path),
+				SHA1:     sha1file(path),
+				SHA256:   sha256file(path),
+				Modified: time.Now().UTC(),
 			})
 			fmt.Printf("%s %s\n", color.YellowString("[CALCULATED]"), path)
 			atomic.AddUint64(&cntAdded, 1)

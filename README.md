@@ -1,7 +1,7 @@
 checksum
 ========
 
-Utility to store sha256 hashes of files in dedicated "database"(actually just a JSON file) to
+Utility to store length, sha1, sha256 hashes of files in dedicated "database"(actually just a JSON file) to
 verify it later as a part of consistency check with automatic new file indexing.
 
 Why not shasum/md5sum/etc.?

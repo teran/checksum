@@ -13,7 +13,9 @@ import (
 
 // Data is a file object in JSON database
 type Data struct {
-	Sha256   string    `json:"sha256"`
+	Length   int64     `json:"length"`
+	SHA1     string    `json:"sha1"`
+	SHA256   string    `json:"sha256"`
 	Modified time.Time `json:"modified"`
 }
 
