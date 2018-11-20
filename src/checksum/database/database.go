@@ -71,6 +71,8 @@ func NewDatabase(path string) *Database {
 
 // ReadOne reads Data entry for specific file
 func (d *Database) ReadOne(path string) (Data, bool) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	data, ok := d.Schema.Data[path]
 	return data, ok
 }
@@ -88,11 +90,15 @@ func (d *Database) WriteOne(path string, data Data) (Data, bool) {
 
 // Count returns count of elements in database
 func (d *Database) Count() int {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return len(d.Schema.Data)
 }
 
 // ListPaths returns list of files present in database
 func (d *Database) ListPaths() []string {
+	mutex.Lock()
+	defer mutex.Unlock()
 	keys := make([]string, 0, d.Count())
 	for k := range d.Schema.Data {
 		keys = append(keys, k)
@@ -103,6 +109,8 @@ func (d *Database) ListPaths() []string {
 
 // MapObjects Returns objects map
 func (d *Database) MapObjects() map[string]Data {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return d.Schema.Data
 }
 
