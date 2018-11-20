@@ -21,7 +21,8 @@ type Data struct {
 
 // Schema is a container for file objects
 type Schema struct {
-	Data map[string]Data `json:"data"`
+	Data     map[string]Data `json:"data"`
+	Modified time.Time       `json:"modified"`
 }
 
 // Database object struct
@@ -39,6 +40,10 @@ func NewDatabase(path string) *Database {
 	database := Database{
 		Path:      path,
 		IsChanged: false,
+	}
+
+	if database.Schema.Modified.IsZero() {
+		database.IsChanged = true
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -123,6 +128,8 @@ func (d *Database) Commit() error {
 	if !d.IsChanged {
 		return nil
 	}
+
+	d.Schema.Modified = time.Now().UTC()
 
 	js, err := json.Marshal(d.Schema)
 	if err != nil {
