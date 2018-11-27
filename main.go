@@ -15,7 +15,7 @@ import (
 	"github.com/fatih/color"
 	"gopkg.in/cheggaaa/pb.v1"
 
-	"checksum/database"
+	"github.com/teran/checksum/database"
 )
 
 var (
