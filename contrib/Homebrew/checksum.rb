@@ -1,9 +1,9 @@
 class Checksum < Formula
   desc "SHA256 file verification for consistency check purposes"
   homepage "https://github.com/teran/checksum"
-  version "0.8"
+  version "0.8.1"
   url "https://github.com/teran/checksum/archive/v#{version}.tar.gz"
-  sha256 "4545d89bf0b80e24f03cda92d6cc534ba5df5a2065f8bed472a915fa5b30aca3"
+  sha256 "fb2b3d7cc48328af82ae465ebd4daf64f99889f86711b68b834ef59e6a48db1c"
 
   depends_on "go" => :build
   depends_on "make" => :build
@@ -17,8 +17,9 @@ class Checksum < Formula
     cd "src/github.com/teran/checksum" do
       ENV["DEP_BUILD_PLATFORMS"] = "darwin"
       ENV["DEP_BUILD_ARCHS"] = arch
-      system "make", "dependencies", "build-macos-amd64"
-      bin.install "release/checksum-darwin-#{arch}" => "checksum"
+      system "dep", "ensure"
+      system "make", "build-macos-#{arch}"
+      bin.install "bin/checksum-darwin-#{arch}" => "checksum"
       prefix.install_metafiles
     end
   end
