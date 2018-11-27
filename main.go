@@ -92,7 +92,6 @@ func main() {
 	}
 
 	if *progressbar == true {
-		*skipfailed = true
 		*skipmissed = true
 		*skipok = true
 	}
