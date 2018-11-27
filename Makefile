@@ -1,4 +1,4 @@
-export PACKAGES := $(shell env GOPATH=$(GOPATH) go list ./src/checksum/...)
+export PACKAGES := $(shell env GOPATH=$(GOPATH) go list ./...)
 export REVISION := $(shell git describe --exact-match --tags $(git log -n1 --pretty='%h') || git rev-parse --verify --short HEAD || echo ${REVISION})
 
 all: clean dependencies build

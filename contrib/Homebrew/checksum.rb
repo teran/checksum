@@ -7,15 +7,20 @@ class Checksum < Formula
 
   depends_on "go" => :build
   depends_on "make" => :build
+  depends_on "dep" => :build
 
   def install
     ENV["GOPATH"] = buildpath
     ENV["REVISION"] = version
-    mkdir_p "src/github.com/teran"
-    ln_s buildpath, "src/github.com/teran/checksum"
-    system "make", "build-macos-amd64"
-    system "mv", "bin/checksum-darwin-amd64", "bin/checksum"
-    bin.install "bin/checksum"
+    arch = MacOS.prefer_64_bit? ? "amd64" : "i386"
+    (buildpath/"src/github.com/teran/checksum").install buildpath.children
+    cd "src/github.com/teran/checksum" do
+      ENV["DEP_BUILD_PLATFORMS"] = "darwin"
+      ENV["DEP_BUILD_ARCHS"] = arch
+      system "make", "dependencies", "build-macos-amd64"
+      bin.install "release/checksum-darwin-#{arch}" => "checksum"
+      prefix.install_metafiles
+    end
   end
 
   test do
