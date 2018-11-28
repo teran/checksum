@@ -47,7 +47,6 @@ func main() {
 	}
 
 	if cfg.Progressbar == true {
-		cfg.SkipMissed = true
 		cfg.SkipOk = true
 	}
 
