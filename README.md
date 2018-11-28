@@ -68,3 +68,16 @@ Flags:
       --version, -V            Print application and Golang versions
       -h, --help               show help
 ```
+
+Build
+-----
+
+System-wide requirements:
+
+* Go
+
+Build:
+
+```bash
+make predependencies build
+```
