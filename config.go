@@ -11,8 +11,8 @@ import (
 type config struct {
 	Concurrency          int    `names:"--concurrency, -c" usage:"Amount of routines to spawn at the same time for checksum verification"`
 	Complete             bool   `names:"--complete" usage:"Completion for shell"`
-	DataDir              string `names:"--datadir, -d" usage:"Data directory path"`
-	DbPath               string `names:"--database, -D" usage:"Database file path"`
+	DataDir              string `names:"--datadir, -d" usage:"Data directory path to run new files scan"`
+	DbPath               string `names:"--database, -D" usage:"Database file path (required)"`
 	GenerateChecksumOnly bool   `names:"--generate-checksums-only" usage:"Skip verification step and add new files only"`
 	Pattern              string `names:"--pattern, -p" usage:"Pattern to match filenames which checking for new files"`
 	SkipFailed           bool   `names:"--skip-failed, --sf" usage:"Skip FAIL verification results from output"`
@@ -28,7 +28,7 @@ func newConfig() *config {
 	set := flag.NewFlagSet(flag.Flag{})
 	set.ParseStruct(&c, os.Args...)
 
-	if c.DataDir == "" || c.DbPath == "" {
+	if c.DbPath == "" {
 		set.Help(true)
 		os.Exit(1)
 	}

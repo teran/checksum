@@ -145,27 +145,33 @@ func main() {
 			bar.Finish()
 		}
 
-		fmt.Printf("%s Verification step complete. Checking for new files on %s\n", color.CyanString("[INFO]"), cfg.DataDir)
+		fmt.Printf("%s Verification step complete\n", color.CyanString("[INFO]"))
 	}
 
-	err = filepath.Walk(cfg.DataDir, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
+	if cfg.DataDir != "" {
+		fmt.Printf("%s Checking for new files on %s", color.CyanString("[INFO]"), cfg.DataDir)
+
+		err = filepath.Walk(cfg.DataDir, func(path string, info os.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil
+			}
+			if isApplicable(path) {
+				db.WriteOne(path, database.Data{
+					Length:   flength(path),
+					SHA1:     sha1file(path),
+					SHA256:   sha256file(path),
+					Modified: time.Now().UTC(),
+				})
+				fmt.Printf("%s %s\n", color.YellowString("[CALCULATED]"), path)
+				atomic.AddUint64(&cntAdded, 1)
+			}
 			return nil
+		})
+		if err != nil {
+			panic(fmt.Sprintf("Error walking through files: %s", err))
 		}
-		if isApplicable(path) {
-			db.WriteOne(path, database.Data{
-				Length:   flength(path),
-				SHA1:     sha1file(path),
-				SHA256:   sha256file(path),
-				Modified: time.Now().UTC(),
-			})
-			fmt.Printf("%s %s\n", color.YellowString("[CALCULATED]"), path)
-			atomic.AddUint64(&cntAdded, 1)
-		}
-		return nil
-	})
-	if err != nil {
-		panic(fmt.Sprintf("Error walking through files: %s", err))
+	} else {
+		fmt.Printf("%s data directory is not specified. Skipping new files check\n", color.CyanString("[INFO]"))
 	}
 
 	err = db.Commit()
