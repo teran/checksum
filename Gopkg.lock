@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:e0ec043cb9aef716f36b45c5229e83c6075d5cabf8dd558f670cc4672de4be26"
+  name = "github.com/cosiner/flag"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "80a0609b2dffd722a2737933560bcbb330cad497"
+  version = "v0.1.1"
+
+[[projects]]
   digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
   name = "github.com/fatih/color"
   packages = ["."]
@@ -53,6 +61,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/cosiner/flag",
     "github.com/fatih/color",
     "gopkg.in/cheggaaa/pb.v1",
   ]

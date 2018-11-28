@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -35,79 +34,35 @@ var (
 )
 
 func main() {
-	flag.Usage = func() {
-		fmt.Printf("Usage: %s [OPTION]...\n", os.Args[0])
-		fmt.Printf("OPTIONS:\n")
-		fmt.Printf("  -concurrency <int>\n")
-		fmt.Printf("    Amount of routines to spawn at the same time for checksum verification(%v by default for your system)\n", runtime.NumCPU())
-		fmt.Printf("  -database <string>\n")
-		fmt.Printf("    Specify database path\n")
-		fmt.Printf("  -datadir <string>\n")
-		fmt.Printf("    Specify data directory\n")
-		fmt.Printf("  -generate-checksum-only\n")
-		fmt.Printf("    Skip step of file verification and only check for new files and generate checksums for them\n")
-		fmt.Printf("  -pattern <string>\n")
-		fmt.Printf("    Pattern to match filenames which checking for new files(default is `" + rawFilePattern + "`)\n")
-		fmt.Printf("  -progressbar\n")
-		fmt.Printf("    Show progress bar instead of printing handled files(the same as `-skipfailed`, `-skipmissed`, `-skipok` but with pretty progress bar)\n")
-		fmt.Printf("  -skipfailed\n")
-		fmt.Printf("    Skip FAIL verification results from output\n")
-		fmt.Printf("  -skipmissed\n")
-		fmt.Printf("    Skip MISS verification results from output\n")
-		fmt.Printf("  -skipok\n")
-		fmt.Printf("    Skip OK verification results from output\n")
-		fmt.Printf("  -version\n")
-		fmt.Printf("    Print application and Golang versions\n\n")
-		fmt.Printf("Examples:\n")
-		fmt.Printf("  %s -database /tmp/db.json -datadir /Volumes/Storage/Photos\n", os.Args[0])
-	}
+	cfg := newConfig()
 
-	concurrency := flag.Int("concurrency", runtime.NumCPU(), "")
-	complete := flag.Bool("complete", false, "")
-	version := flag.Bool("version", false, "")
-	datadir := flag.String("datadir", "", "")
-	dbPath := flag.String("database", "", "")
-	generateChecksumOnly := flag.Bool("generate-checksum-only", false, "")
-	pattern := flag.String("pattern", rawFilePattern, "")
-	skipfailed := flag.Bool("skipfailed", false, "")
-	skipmissed := flag.Bool("skipmissed", false, "")
-	skipok := flag.Bool("skipok", false, "")
-	progressbar := flag.Bool("progressbar", false, "")
-
-	flag.Parse()
-
-	if *version == true {
+	if cfg.Version == true {
 		printVersion()
 		return
 	}
 
-	if *complete == true {
+	if cfg.Complete == true {
 		completeArgs(flag.Arg(1))
 		return
 	}
 
-	if *datadir == "" || *dbPath == "" {
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	if *progressbar == true {
-		*skipmissed = true
-		*skipok = true
+	if cfg.Progressbar == true {
+		cfg.SkipMissed = true
+		cfg.SkipOk = true
 	}
 
 	var err error
 
-	db = database.NewDatabase(*dbPath)
-	filePattern, err = regexp.Compile(*pattern)
+	db = database.NewDatabase(cfg.DbPath)
+	filePattern, err = regexp.Compile(cfg.Pattern)
 	if err != nil {
 		log.Fatalf("Error compiling pattern: %s", err)
 	}
 
-	if !*generateChecksumOnly {
-		sem := make(chan bool, *concurrency)
+	if !cfg.GenerateChecksumOnly {
+		sem := make(chan bool, cfg.Concurrency)
 		var bar *pb.ProgressBar
-		if *progressbar {
+		if cfg.Progressbar {
 			bar = pb.New(db.Count())
 			bar.ShowCounters = true
 			bar.SetRefreshRate(time.Second)
@@ -122,7 +77,7 @@ func main() {
 			sem <- true
 			wg.Add(1)
 			go func(file string, obj database.Data) {
-				if *progressbar {
+				if cfg.Progressbar {
 					defer func() {
 						bar.Increment()
 					}()
@@ -133,7 +88,7 @@ func main() {
 				defer wg.Done()
 
 				if _, err := os.Stat(file); os.IsNotExist(err) {
-					if !*skipmissed {
+					if !cfg.SkipMissed {
 						fmt.Printf("%s %s\n", color.RedString("[MISS]"), file)
 					}
 					atomic.AddUint64(&cntMissed, 1)
@@ -169,13 +124,13 @@ func main() {
 				}
 
 				if res {
-					if !*skipok {
+					if !cfg.SkipOk {
 						fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
 					}
 					atomic.AddUint64(&cntPassed, 1)
 					return
 				}
-				if !*skipfailed {
+				if !cfg.SkipFailed {
 					fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
 				}
 				atomic.AddUint64(&cntFailed, 1)
@@ -187,14 +142,14 @@ func main() {
 		}
 		wg.Wait()
 
-		if *progressbar {
+		if cfg.Progressbar {
 			bar.Finish()
 		}
 
-		fmt.Printf("%s Verification step complete. Checking for new files on %s\n", color.CyanString("[INFO]"), *datadir)
+		fmt.Printf("%s Verification step complete. Checking for new files on %s\n", color.CyanString("[INFO]"), cfg.DataDir)
 	}
 
-	err = filepath.Walk(*datadir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(cfg.DataDir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
