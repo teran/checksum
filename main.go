@@ -148,7 +148,7 @@ func main() {
 	}
 
 	if cfg.DataDir != "" {
-		fmt.Printf("%s Checking for new files on %s", color.CyanString("[INFO]"), cfg.DataDir)
+		fmt.Printf("%s Checking for new files on %s\n", color.CyanString("[INFO]"), cfg.DataDir)
 
 		err = filepath.Walk(cfg.DataDir, func(path string, info os.FileInfo, err error) error {
 			if info.IsDir() {
