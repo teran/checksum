@@ -8,6 +8,10 @@ import (
 	"github.com/cosiner/flag"
 )
 
+const (
+	defaultRawFilePattern = ".(3fr|ari|arw|bay|crw|cr2|cr3|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$"
+)
+
 type config struct {
 	Concurrency          int    `names:"--concurrency, -c" usage:"Amount of routines to spawn at the same time for checksum verification"`
 	Complete             bool   `names:"--complete" usage:"Completion for shell"`
@@ -37,6 +41,10 @@ func newConfig() *config {
 		c.Concurrency = runtime.NumCPU()
 	}
 
+	if c.Pattern == "" {
+		c.Pattern = defaultRawFilePattern
+	}
+
 	return &c
 }
 
@@ -64,7 +72,7 @@ func (c *config) Metadata() map[string]flag.Flag {
 			Desc: fmt.Sprintf("Default value is %d for your system", runtime.NumCPU()),
 		},
 		"--pattern": {
-			Desc: fmt.Sprintf("Default is `%s`", rawFilePattern),
+			Desc: fmt.Sprintf("Default is `%s`", defaultRawFilePattern),
 		},
 	}
 }

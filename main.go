@@ -23,9 +23,8 @@ var (
 	// Version - variable to store current commit,tag,whatever
 	Version = "No version specified(probably trunk build)"
 
-	db             *database.Database
-	filePattern    *regexp.Regexp
-	rawFilePattern = ".(3fr|ari|arw|bay|crw|cr2|cr3|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$"
+	db          *database.Database
+	filePattern *regexp.Regexp
 
 	cntAdded  uint64
 	cntFailed uint64
