@@ -4,37 +4,6 @@ checksum
 Utility to store length, sha1, sha256 hashes of files in dedicated "database"(actually just a JSON file) to
 verify it later as a part of consistency check with automatic new file indexing.
 
-Why not shasum/md5sum/etc.?
----------------------------
-
-checksum provides straight workflow for verification and adding new files processes
-to avoid remembering someting like `find $dir | xargs md5sum >> /tmp/database.txt`.
-
-checkum automatically:
-
-* verifies files
-* adds new
-* report about fails and misses
-
-How to install
---------------
-
-macOS with Homebrew:
-
-```bash
-brew install https://raw.githubusercontent.com/teran/checksum/master/contrib/Homebrew/checksum.rb
-```
-
-or to upgrade:
-
-```bash
-brew upgrade https://raw.githubusercontent.com/teran/checksum/master/contrib/Homebrew/checksum.rb
-```
-
-Other distros:
-
-just refer to releases page and download appropriate binary for your platform
-
 Usage
 -----
 
@@ -42,11 +11,13 @@ Usage
 Utility to verify files consistency with length, SHA1 and SHA256
 
 Usage:
-      checksum-darwin-amd64 [FLAG]...
+      checksum [FLAG]...
 
 Version:
-      version: 98029e9
+      version: 0.8.3
+      commit: 026c5147ec576226a108035b08e15f2f5618f507
       built with: go1.11.2
+      built at: 2018-12-01T09:35:54Z
 
 Description:
       checksum creates database (actually just a JSON file) to store file length, SHA1, SHA256
@@ -68,6 +39,24 @@ Flags:
       --version, -V            Print application and Golang versions
       -h, --help               show help
 ```
+
+
+Why not shasum/md5sum/etc.?
+---------------------------
+
+checksum provides straight workflow for verification and adding new files processes
+to avoid remembering someting like `find $dir | xargs md5sum >> /tmp/database.txt`.
+
+checkum automatically:
+
+* verifies files
+* adds new
+* report about fails and misses
+
+How to install
+--------------
+
+Just refer to [releases page](https://github.com/teran/checksum/releases) and download appropriate binary for your platform or build your own one right from master.
 
 Build
 -----
