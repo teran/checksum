@@ -22,7 +22,7 @@ var (
 
 	version = "No version specified(probably trunk build)"
 	commit  = "master"
-	date    = "0000-00-00 00:00:00"
+	date    = "0000-00-00T00:00:00Z"
 
 	db          *database.Database
 	filePattern *regexp.Regexp

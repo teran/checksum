@@ -1,5 +1,7 @@
 export PACKAGES := $(shell env GOPATH=$(GOPATH) go list ./...)
-export REVISION := $(shell git describe --exact-match --tags $(git log -n1 --pretty='%h') || git rev-parse --verify --short HEAD || echo ${REVISION})
+export VERSION := $(shell git describe --exact-match --tags $(git log -n1 --pretty='%h') || git rev-parse --verify --short HEAD || echo ${VERSION})
+export COMMIT := $(shell git rev-parse --verify --short HEAD)
+export DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 all: clean dependencies build
 
@@ -15,22 +17,22 @@ build-linux: build-linux-amd64 build-linux-i386
 build-windows: build-windows-amd64 build-windows-i386
 
 build-macos-amd64:
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.Version=${REVISION}" -o bin/checksum-darwin-amd64 .
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-darwin-amd64 .
 
 build-macos-i386:
-	GOOS=darwin GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.Version=${REVISION}" -o bin/checksum-darwin-i386 .
+	GOOS=darwin GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-darwin-i386 .
 
 build-linux-amd64:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.Version=${REVISION}" -o bin/checksum-linux-amd64 .
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-linux-amd64 .
 
 build-linux-i386:
-	GOOS=linux GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.Version=${REVISION}" -o bin/checksum-linux-i386 .
+	GOOS=linux GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-linux-i386 .
 
 build-windows-amd64:
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.Version=${REVISION}" -o bin/checksum-windows-amd64.exe .
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-windows-amd64.exe .
 
 build-windows-i386:
-	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.Version=${REVISION}" -o bin/checksum-windows-i386.exe .
+	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-windows-i386.exe .
 
 dependencies:
 	dep ensure
