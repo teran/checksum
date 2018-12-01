@@ -49,7 +49,7 @@ sign:
 	gpg --detach-sign --digest-algo SHA512 --no-tty --batch --output bin/checksum-windows-i386.exe.sig 		bin/checksum-windows-i386.exe
 
 test:
-	go test ./src/checksum/...
+	go test ./...
 
 verify:
 	gpg --verify bin/checksum-darwin-amd64.sig 				bin/checksum-darwin-amd64
