@@ -54,8 +54,10 @@ func (c *config) Metadata() map[string]flag.Flag {
 
 		version = fmt.Sprintf(`
 			version: %s
+			commit: %s
 			built with: %s
-		`, Version, runtime.Version())
+			built at: %s
+		`, version, commit, runtime.Version(), date)
 
 		desc = `
 		checksum creates database (actually just a JSON file) to store file length, SHA1, SHA256 

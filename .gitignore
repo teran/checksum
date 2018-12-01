@@ -8,4 +8,5 @@ pkg/
 *.out
 .glide/
 .DS_Store
+dist/
 vendor/

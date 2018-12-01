@@ -20,8 +20,9 @@ import (
 var (
 	wg sync.WaitGroup
 
-	// Version - variable to store current commit,tag,whatever
-	Version = "No version specified(probably trunk build)"
+	version = "No version specified(probably trunk build)"
+	commit  = "master"
+	date    = "0000-00-00 00:00:00"
 
 	db          *database.Database
 	filePattern *regexp.Regexp

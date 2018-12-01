@@ -70,7 +70,7 @@ func verify(path string, length int64, sha1, sha256 string) bool {
 }
 
 func printVersion() {
-	fmt.Printf("checksum version: %s\n", Version)
+	fmt.Printf("checksum version: %s\n", version)
 	fmt.Printf("Built wih Go version: %s\n", runtime.Version())
 }
 
