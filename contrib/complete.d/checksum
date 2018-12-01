@@ -6,7 +6,7 @@ _checksum ()
 {
   CUR="${COMP_WORDS[COMP_CWORD]}"
   COMPREPLY=()
-  OPTS=$(echo | checksum -complete ${COMP_CWORD} -- ${COMP_WORDS[@]})
+  OPTS=$(echo | checksum --complete ${COMP_CWORD} -- ${COMP_WORDS[@]})
 
   if [ $? -ne 0 ]; then
     return $?
