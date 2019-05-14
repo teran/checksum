@@ -27,10 +27,11 @@ var (
 	db          *database.Database
 	filePattern *regexp.Regexp
 
-	cntAdded  uint64
-	cntFailed uint64
-	cntMissed uint64
-	cntPassed uint64
+	cntAdded   uint64
+	cntDeleted uint64
+	cntFailed  uint64
+	cntMissed  uint64
+	cntPassed  uint64
 )
 
 func main() {
@@ -98,6 +99,7 @@ func main() {
 					if cfg.DeleteMissed {
 						fmt.Printf("%s DeleteMissed requested: deleting file `%s` from database\n", color.BlueString("[NOTE]"), file)
 						db.DeleteOne(file)
+						atomic.AddUint64(&cntDeleted, 1)
 					}
 
 					atomic.AddUint64(&cntMissed, 1)
@@ -192,6 +194,7 @@ func main() {
 	fmt.Printf("------------\n")
 	fmt.Printf("Job is done:\n")
 	fmt.Printf("  Added: %d\n", cntAdded)
+	fmt.Printf("  Deleted: %d\n", cntDeleted)
 	fmt.Printf("  Missed: %d\n", cntMissed)
 	fmt.Printf("  Failed: %d\n", cntFailed)
 	fmt.Printf("  Passed: %d\n", cntPassed)
