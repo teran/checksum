@@ -95,6 +95,19 @@ func (d *Database) WriteOne(path string, data Data) (Data, bool) {
 	return data, ok
 }
 
+// DeleteOne deletes Data entry for specified path
+func (d *Database) DeleteOne(path string) bool {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	if _, ok := d.Schema.Data[path]; !ok {
+		return false
+	}
+
+	delete(d.Schema.Data, path)
+	return true
+}
+
 // Count returns count of elements in database
 func (d *Database) Count() int {
 	mutex.Lock()

@@ -90,6 +90,12 @@ func main() {
 					if !cfg.SkipMissed {
 						fmt.Printf("%s %s\n", color.RedString("[MISS]"), file)
 					}
+
+					if cfg.DeleteMissed {
+						fmt.Printf("%s DeleteMissed requested: deleting file `%s` from database\n", color.BlueString("[NOTE]"), file)
+						db.DeleteOne(file)
+					}
+
 					atomic.AddUint64(&cntMissed, 1)
 					return
 				}

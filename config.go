@@ -17,6 +17,7 @@ type config struct {
 	Complete             bool   `names:"--complete" usage:"Completion for shell"`
 	DataDir              string `names:"--datadir, -d" usage:"Data directory path to run new files scan"`
 	DbPath               string `names:"--database, -D" usage:"Database file path (required)"`
+	DeleteMissed         bool   `names:"--delete-missed" usage:"Delete missed files from database"`
 	GenerateChecksumOnly bool   `names:"--generate-checksums-only" usage:"Skip verification step and add new files only"`
 	Pattern              string `names:"--pattern, -p" usage:"Pattern to match filenames which checking for new files"`
 	SkipFailed           bool   `names:"--skip-failed, --sf" usage:"Skip FAIL verification results from output"`
@@ -60,7 +61,7 @@ func (c *config) Metadata() map[string]flag.Flag {
 		`, version, commit, runtime.Version(), date)
 
 		desc = `
-		checksum creates database (actually just a JSON file) to store file length, SHA1, SHA256 
+		checksum creates database (actually just a JSON file) to store file length, SHA1, SHA256
 		to verify file consistency and report if something goes wrong.
 		`
 	)
