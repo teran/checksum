@@ -5,58 +5,74 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/suite"
 )
 
-func TestDatabase(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("", "database")
-	if err != nil {
-		t.Errorf("Error creating tempfile: %s", err)
-	}
-	os.Remove(tmpfile.Name())
+type DatabaseTestSuite struct {
+	suite.Suite
 
-	d := NewDatabase(tmpfile.Name())
+	tmpfile *os.File
+	db      *Database
+}
 
-	dataObject := Data{
+func (s *DatabaseTestSuite) SetupTest() {
+	var err error
+	s.tmpfile, err = ioutil.TempFile("", "database")
+	s.Require().NoError(err)
+
+	// We need file path only
+	os.Remove(s.tmpfile.Name())
+
+	s.db, err = NewDatabase(s.tmpfile.Name())
+	s.Require().NoError(err)
+}
+
+func (s *DatabaseTestSuite) TestAll() {
+	dataObject := &DataObject{
 		Modified: time.Now(),
 		Length:   10,
 		SHA1:     "deadbeaf",
 		SHA256:   "deadbeaf",
 	}
 
-	_, ok := d.WriteOne("testPath", dataObject)
-	if !ok {
-		t.Errorf("Error reported invoking WriteOne")
-	}
+	res, ok := s.db.WriteOne("test-path", dataObject)
+	s.Require().True(ok)
+	s.Require().NotNil(res)
+	s.Require().Equal(dataObject, res)
 
-	data, ok := d.ReadOne("testPath")
-	if !ok {
-		t.Errorf("Error reported invoking ReadOne")
-	}
+	res, ok = s.db.WriteOne("test-path", dataObject)
+	s.Require().True(ok)
+	s.Require().NotNil(res)
+	s.Require().Equal(dataObject, res)
 
-	if data != dataObject {
-		t.Errorf("Wrong data object returned from ReadOne")
-	}
+	res, ok = s.db.ReadOne("not-existent-path")
+	s.Require().False(ok)
+	s.Require().Nil(res)
 
-	err = d.Commit()
-	if err != nil {
-		t.Errorf("Error while executing Commit(): %s", err)
-	}
+	res, ok = s.db.ReadOne("test-path")
+	s.Require().True(ok)
+	s.Require().NotNil(res)
+	s.Require().Equal(dataObject, res)
 
-	d2 := NewDatabase(tmpfile.Name())
-	do, ok := d2.ReadOne("testPath")
-	if !ok {
-		t.Errorf("Error reported invoking ReadOne on flushed database")
-	}
+	ok = s.db.DeleteOne("not-existent-path")
+	s.Require().False(ok)
 
-	if do.Length != dataObject.Length {
-		t.Errorf("Saved object differs with Length from it's origin: %#v != %#v", dataObject, do)
-	}
+	ok = s.db.DeleteOne("test-path")
+	s.Require().True(ok)
 
-	if do.SHA1 != dataObject.SHA1 {
-		t.Errorf("Saved object differs with SHA1 from it's origin: %#v != %#v", dataObject, do)
-	}
+	res, ok = s.db.ReadOne("not-existent-path")
+	s.Require().False(ok)
+	s.Require().Nil(res)
 
-	if do.SHA256 != dataObject.SHA256 {
-		t.Errorf("Saved object differs with SHA256 from it's origin: %#v != %#v", dataObject, do)
-	}
+	err := s.db.Commit()
+	s.Require().NoError(err)
+}
+
+func (s *DatabaseTestSuite) TearDownTest() {
+	os.Remove(s.tmpfile.Name())
+}
+
+func TestDatabaseTestSuite(t *testing.T) {
+	suite.Run(t, &DatabaseTestSuite{})
 }

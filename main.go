@@ -52,7 +52,11 @@ func main() {
 
 	var err error
 
-	db = database.NewDatabase(cfg.DbPath)
+	db, err = database.NewDatabase(cfg.DbPath)
+	if err != nil {
+		log.Fatalf("error opening database: %s", err)
+	}
+
 	filePattern, err = regexp.Compile(cfg.Pattern)
 	if err != nil {
 		log.Fatalf("Error compiling pattern: %s", err)
@@ -75,7 +79,7 @@ func main() {
 		for file, obj := range db.MapObjects() {
 			sem <- true
 			wg.Add(1)
-			go func(file string, obj database.Data) {
+			go func(file string, obj *database.DataObject) {
 				if cfg.Progressbar {
 					defer func() {
 						bar.Increment()
@@ -120,7 +124,7 @@ func main() {
 				res := verify(file, obj.Length, obj.SHA1, obj.SHA256)
 
 				if isChanged {
-					db.WriteOne(file, database.Data{
+					db.WriteOne(file, &database.DataObject{
 						Length:   obj.Length,
 						SHA1:     obj.SHA1,
 						SHA256:   obj.SHA256,
@@ -162,7 +166,7 @@ func main() {
 				return nil
 			}
 			if isApplicable(path) {
-				db.WriteOne(path, database.Data{
+				db.WriteOne(path, &database.DataObject{
 					Length:   flength(path),
 					SHA1:     sha1file(path),
 					SHA256:   sha256file(path),

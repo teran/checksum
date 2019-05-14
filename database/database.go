@@ -11,8 +11,8 @@ import (
 	"github.com/fatih/color"
 )
 
-// Data is a file object in JSON database
-type Data struct {
+// DataObject is a file object in JSON database
+type DataObject struct {
 	Length   int64     `json:"length"`
 	SHA1     string    `json:"sha1"`
 	SHA256   string    `json:"sha256"`
@@ -21,8 +21,8 @@ type Data struct {
 
 // Schema is a container for file objects
 type Schema struct {
-	Data     map[string]Data `json:"data"`
-	Modified time.Time       `json:"modified"`
+	Data     map[string]*DataObject `json:"data"`
+	Modified time.Time              `json:"modified"`
 }
 
 // Database object struct
@@ -35,7 +35,7 @@ type Database struct {
 var mutex = &sync.Mutex{}
 
 // NewDatabase creates new Database object
-func NewDatabase(path string) *Database {
+func NewDatabase(path string) (*Database, error) {
 	fmt.Printf("%s Opening database at %s\n", color.CyanString("[INFO]"), path)
 	database := Database{
 		Path:      path,
@@ -49,35 +49,35 @@ func NewDatabase(path string) *Database {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		fmt.Printf("%s Database at %s doesn't exist. Creating a new one\n", color.YellowString("[WARN]"), path)
 		js, err := json.Marshal(Schema{
-			Data: make(map[string]Data),
+			Data: make(map[string]*DataObject),
 		})
 		if err != nil {
-			panic(fmt.Sprintf("Error marshaling initial JSON: %s", err))
+			return nil, fmt.Errorf("Error marshaling initial JSON: %s", err)
 		}
 
 		err = ioutil.WriteFile(path, js, 0644)
 		if err != nil {
-			panic(fmt.Sprintf("Error creating schema: %s", err))
+			return nil, fmt.Errorf("Error creating schema: %s", err)
 		}
 	}
 
 	fp, err := os.Open(path)
 	if err != nil {
-		panic(fmt.Sprintf("Error opening file: %s", err))
+		return nil, fmt.Errorf("Error opening file: %s", err)
 	}
 	defer fp.Close()
 
 	decoder := json.NewDecoder(fp)
 	err = decoder.Decode(&database.Schema)
 	if err != nil {
-		panic(fmt.Sprintf("Error decoding JSON data: %s", err))
+		return nil, fmt.Errorf("Error decoding JSON data: %s", err)
 	}
 
-	return &database
+	return &database, nil
 }
 
 // ReadOne reads Data entry for specific file
-func (d *Database) ReadOne(path string) (Data, bool) {
+func (d *Database) ReadOne(path string) (*DataObject, bool) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	data, ok := d.Schema.Data[path]
@@ -85,7 +85,7 @@ func (d *Database) ReadOne(path string) (Data, bool) {
 }
 
 // WriteOne writes Data entry for specific file
-func (d *Database) WriteOne(path string, data Data) (Data, bool) {
+func (d *Database) WriteOne(path string, data *DataObject) (*DataObject, bool) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	d.Schema.Data[path] = data
@@ -128,7 +128,7 @@ func (d *Database) ListPaths() []string {
 }
 
 // MapObjects Returns objects map
-func (d *Database) MapObjects() map[string]Data {
+func (d *Database) MapObjects() map[string]*DataObject {
 	mutex.Lock()
 	defer mutex.Unlock()
 	return d.Schema.Data
