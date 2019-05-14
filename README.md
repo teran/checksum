@@ -11,33 +11,34 @@ Usage
 Utility to verify files consistency with length, SHA1 and SHA256
 
 Usage:
-      checksum [FLAG]...
+    checksum [FLAG]...
 
 Version:
-      version: 0.8.3
-      commit: 026c5147ec576226a108035b08e15f2f5618f507
-      built with: go1.11.2
-      built at: 2018-12-01T09:35:54Z
+    version: 7d4c766
+    commit: 7d4c766
+    built with: go1.12.5
+    built at: 2019-05-14T23:51:55Z
 
 Description:
-      checksum creates database (actually just a JSON file) to store file length, SHA1, SHA256
-      to verify file consistency and report if something goes wrong.
+    checksum creates database (actually just a JSON file) to store file length, SHA1, SHA256
+    to verify file consistency and report if something goes wrong.
 
 Flags:
-      --concurrency, -c        Amount of routines to spawn at the same time for checksum verification
-            Default value is 8 for your system
-      --complete               Completion for shell
-      --datadir, -d            Data directory path to run new files scan
-      --database, -D           Database file path (required)
-      --generate-checksums-only Skip verification step and add new files only
-      --pattern, -p            Pattern to match filenames which checking for new files
-            Default is `.(3fr|ari|arw|bay|crw|cr2|cr3|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`
-      --skip-failed, --sf      Skip FAIL verification results from output
-      --skip-missed, --sm      Skip MISS verification results from output
-      --skip-ok, --so          Skip OK verification results from output
-      --progressbar            Show progress bar instead of printing handled files
-      --version, -V            Print application and Golang versions
-      -h, --help               show help
+    --concurrency, -c        Amount of routines to spawn at the same time for checksum verification (type: int)
+        Default value is 8 for your system
+    --complete               Completion for shell (type: bool)
+    --datadir, -d            Data directory path to run new files scan (type: string)
+    --database, -D           Database file path (required) (type: string)
+    --delete-missed          Delete missed files from database (type: bool)
+    --generate-checksums-only Skip verification step and add new files only (type: bool)
+    --pattern, -p            Pattern to match filenames which checking for new files (type: string)
+        Default is `.(3fr|ari|arw|bay|crw|cr2|cr3|cap|data|dcs|dcr|drf|eip|erf|fff|gpr|iiq|k25|kdc|mdc|mef|mos|mrw|nef|nrw|obm|orf|pef|ptx|pxn|r3d|raf|raw|rwl|rw2|rwz|sr2|srf|srw|x3f)$`
+    --skip-failed, --sf      Skip FAIL verification results from output (type: bool)
+    --skip-missed, --sm      Skip MISS verification results from output (type: bool)
+    --skip-ok, --so          Skip OK verification results from output (type: bool)
+    --progressbar            Show progress bar instead of printing handled files (type: bool)
+    --version, -V            Print application and Golang versions (type: bool)
+    -h, --help               show help (type: bool)
 ```
 
 
