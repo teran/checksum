@@ -112,14 +112,16 @@ func (d *Database) DeleteOne(path string) bool {
 func (d *Database) Count() int {
 	mutex.Lock()
 	defer mutex.Unlock()
+
 	return len(d.Schema.Data)
 }
 
 // ListPaths returns list of files present in database
 func (d *Database) ListPaths() []string {
+	keys := make([]string, 0, d.Count())
+
 	mutex.Lock()
 	defer mutex.Unlock()
-	keys := make([]string, 0, d.Count())
 	for k := range d.Schema.Data {
 		keys = append(keys, k)
 	}
