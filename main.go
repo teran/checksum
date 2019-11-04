@@ -37,11 +37,6 @@ var (
 func main() {
 	cfg := newConfig()
 
-	if cfg.Version == true {
-		printVersion()
-		return
-	}
-
 	if cfg.Complete == true {
 		completeArgs(flag.Arg(1))
 		return

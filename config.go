@@ -33,6 +33,11 @@ func newConfig() *config {
 	set := flag.NewFlagSet(flag.Flag{})
 	set.ParseStruct(&c, os.Args...)
 
+	if c.Version == true {
+		printVersion()
+		os.Exit(0)
+	}
+
 	if c.DbPath == "" {
 		set.Help(true)
 		os.Exit(1)
