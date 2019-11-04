@@ -1,3 +1,21 @@
+brews:
+  - name: checksum
+    github:
+      owner: teran
+      name: homebrew-tap
+    ids:
+      - default
+    commit_author:
+      name: "Igor Shishkin"
+      email: me@teran.ru
+    url_template: "https://github.com/teran/checksum/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    folder: Formula
+    homepage: "https://github.com/teran/checksum"
+    description: "SHA256 file verification for consistency check purposes"
+    test: |
+      system "#{bin}/checksum -version"
+    install: |
+      bin.install "checksum"
 builds:
 - env:
     - CGO_ENABLED=0
@@ -11,12 +29,14 @@ builds:
     - amd64
     - arm
     - arm64
-archive:
-  replacements:
-    386: i386
-  format_overrides:
-    - goos: windows
-      format: zip
+archives:
+  - id: default
+    format_overrides:
+      - goos: windows
+        format: zip
+    replacements:
+      386: i386
+      darwin: macOS
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -27,5 +47,5 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
-sign:
-  artifacts: checksum
+signs:
+  - artifacts: checksum
