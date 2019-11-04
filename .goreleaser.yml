@@ -13,7 +13,7 @@ brews:
     homepage: "https://github.com/teran/checksum"
     description: "SHA256 file verification for consistency check purposes"
     test: |
-      system "#{bin}/checksum -version"
+      system "#{bin}/checksum --version"
     install: |
       bin.install "checksum"
 builds:
