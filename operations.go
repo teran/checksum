@@ -14,15 +14,15 @@ import (
 
 func completeArgs(word string) {
 	fmt.Println(strings.Join([]string{
-		"-concurrency",
-		"-database",
-		"-datadir",
-		"-pattern",
-		"-progressbar",
-		"-skipfailed",
-		"-skipmissed",
-		"-skipok",
-		"-version",
+		"--concurrency",
+		"--database",
+		"--datadir",
+		"--pattern",
+		"--progressbar",
+		"--skipfailed",
+		"--skipmissed",
+		"--skipok",
+		"--version",
 	}, " "))
 }
 
