@@ -3,7 +3,7 @@ export VERSION := $(shell git describe --exact-match --tags $(git log -n1 --pret
 export COMMIT := $(shell git rev-parse --verify --short HEAD)
 export DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-all: clean dependencies build
+all: clean build
 
 clean:
 	rm -vf bin/*
@@ -33,12 +33,6 @@ build-windows-amd64:
 
 build-windows-i386:
 	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-windows-i386.exe .
-
-dependencies:
-	dep ensure
-
-predependencies:
-	go get -u github.com/golang/dep/cmd/dep
 
 sign:
 	gpg --detach-sign --digest-algo SHA512 --no-tty --batch --output bin/checksum-darwin-amd64.sig 				bin/checksum-darwin-amd64
