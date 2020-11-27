@@ -25,7 +25,6 @@ builds:
     - windows
     - freebsd
   goarch:
-    - 386
     - amd64
     - arm
     - arm64
@@ -35,7 +34,6 @@ archives:
       - goos: windows
         format: zip
     replacements:
-      386: i386
       darwin: macOS
 checksum:
   name_template: 'checksums.txt'
