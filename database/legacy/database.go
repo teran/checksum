@@ -1,4 +1,4 @@
-package database
+package legacy
 
 import (
 	"encoding/json"

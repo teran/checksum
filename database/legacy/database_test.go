@@ -1,4 +1,4 @@
-package database
+package legacy
 
 import (
 	"io/ioutil"
