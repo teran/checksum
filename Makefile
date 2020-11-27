@@ -10,29 +10,20 @@ clean:
 
 build: build-macos build-linux build-windows
 
-build-macos: build-macos-amd64 build-macos-i386
+build-macos: build-macos-amd64
 
-build-linux: build-linux-amd64 build-linux-i386
+build-linux: build-linux-amd64
 
-build-windows: build-windows-amd64 build-windows-i386
+build-windows: build-windows-amd64
 
 build-macos-amd64:
 	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-darwin-amd64 .
 
-build-macos-i386:
-	GOOS=darwin GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-darwin-i386 .
-
 build-linux-amd64:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-linux-amd64 .
 
-build-linux-i386:
-	GOOS=linux GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-linux-i386 .
-
 build-windows-amd64:
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-windows-amd64.exe .
-
-build-windows-i386:
-	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" -o bin/checksum-windows-i386.exe .
 
 sign:
 	gpg --detach-sign --digest-algo SHA512 --no-tty --batch --output bin/checksum-darwin-amd64.sig 				bin/checksum-darwin-amd64
