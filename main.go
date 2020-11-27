@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"log"
@@ -108,13 +109,26 @@ func main() {
 					isChanged = true
 				}
 
+				data, err := readFile(file)
+				if err != nil {
+					log.Fatalf("error reading data: %s", err)
+				}
+
 				if obj.SHA1 == "" {
-					obj.SHA1 = sha1file(file)
+					obj.SHA1, err = SHA1(bytes.NewReader(data))
+					if err != nil {
+						log.Fatalf("error calculating SHA1: %s", err)
+					}
+
 					isChanged = true
 				}
 
 				if obj.SHA256 == "" {
-					obj.SHA256 = sha256file(file)
+					obj.SHA256, err = SHA256(bytes.NewReader(data))
+					if err != nil {
+						log.Fatalf("error calculating SHA256: %s", err)
+					}
+
 					isChanged = true
 				}
 
@@ -163,10 +177,25 @@ func main() {
 				return nil
 			}
 			if isApplicable(path) {
+				data, err := readFile(path)
+				if err != nil {
+					log.Fatalf("error reading file: %s", err)
+				}
+
+				sha1, err := SHA1(bytes.NewReader(data))
+				if err != nil {
+					log.Fatalf("error calculating SHA1: %s", err)
+				}
+
+				sha256, err := SHA256(bytes.NewReader(data))
+				if err != nil {
+					log.Fatalf("error calculating SHA256: %s", err)
+				}
+
 				db.WriteOne(path, &database.DataObject{
 					Length:   flength(path),
-					SHA1:     sha1file(path),
-					SHA256:   sha256file(path),
+					SHA1:     sha1,
+					SHA256:   sha256,
 					Modified: time.Now().UTC(),
 				})
 				fmt.Printf("%s %s\n", color.YellowString("[CALCULATED]"), path)

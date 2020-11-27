@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -26,34 +28,36 @@ func completeArgs(word string) {
 	}, " "))
 }
 
-func sha256file(filename string) string {
-	fp, err := os.Open(filename)
+func readFile(fn string) ([]byte, error) {
+	fp, err := os.Open(fn)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer fp.Close()
 
-	sha256 := sha256.New()
-	if _, err := io.Copy(sha256, fp); err != nil {
-		log.Fatal(err)
-	}
-
-	return fmt.Sprintf("%x", sha256.Sum(nil))
+	return ioutil.ReadAll(fp)
 }
 
-func sha1file(filename string) string {
-	fp, err := os.Open(filename)
+// SHA256 ...
+func SHA256(rd io.Reader) (string, error) {
+	h := sha256.New()
+	_, err := io.Copy(h, rd)
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer fp.Close()
-
-	sha1 := sha1.New()
-	if _, err := io.Copy(sha1, fp); err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	return fmt.Sprintf("%x", sha1.Sum(nil))
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
+}
+
+// SHA1 ...
+func SHA1(rd io.Reader) (string, error) {
+	h := sha1.New()
+	_, err := io.Copy(h, rd)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
 func flength(filename string) int64 {
@@ -66,7 +70,25 @@ func flength(filename string) int64 {
 }
 
 func verify(path string, length int64, sha1, sha256 string) bool {
-	return flength(path) == length && sha1file(path) == sha1 && sha256file(path) == sha256
+	data, err := readFile(path)
+	if err != nil {
+		log.Printf("error reading file: %s", err)
+		return false
+	}
+
+	actSHA1, err := SHA1(bytes.NewReader(data))
+	if err != nil {
+		log.Printf("error calculating SHA1: %s", err)
+		return false
+	}
+
+	actSHA256, err := SHA256(bytes.NewReader(data))
+	if err != nil {
+		log.Printf("error calculating SHA256: %s", err)
+		return false
+	}
+
+	return flength(path) == length && actSHA1 == sha1 && actSHA256 == sha256
 }
 
 func printVersion() {
