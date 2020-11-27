@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -73,7 +74,14 @@ func main() {
 			bar.Start()
 		}
 
-		for file, obj := range db.MapObjects() {
+		objects := db.MapObjects()
+		keys := make([]string, 0, len(objects))
+		for k := range objects {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, key := range keys {
 			sem <- true
 			wg.Add(1)
 			go func(file string, obj *database.DataObject) {
@@ -154,7 +162,7 @@ func main() {
 					fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
 				}
 				atomic.AddUint64(&cntFailed, 1)
-			}(file, obj)
+			}(key, objects[key])
 		}
 
 		for i := 0; i < cap(sem); i++ {
