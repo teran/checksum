@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"log"
@@ -9,19 +8,17 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
-	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/fatih/color"
+	"golang.org/x/sync/errgroup"
 	"gopkg.in/cheggaaa/pb.v1"
 
 	database "github.com/teran/checksum/database/legacy"
 )
 
 var (
-	wg sync.WaitGroup
-
 	appVersion     = "No version specified(probably trunk build)"
 	buildTimestamp = "0000-00-00T00:00:00Z"
 
@@ -60,7 +57,6 @@ func main() {
 	}
 
 	if !cfg.GenerateChecksumOnly {
-		sem := make(chan bool, cfg.Concurrency)
 		var bar *pb.ProgressBar
 		if cfg.Progressbar {
 			bar = pb.New(db.Count())
@@ -80,94 +76,83 @@ func main() {
 		}
 		sort.Strings(keys)
 
+		wg := &errgroup.Group{}
+		wg.SetLimit(cfg.Concurrency)
+
 		for _, key := range keys {
-			sem <- true
-			wg.Add(1)
-			go func(file string, obj *database.DataObject) {
-				if cfg.Progressbar {
-					defer func() {
-						bar.Increment()
-					}()
-				}
-				defer func() {
-					<-sem
-				}()
-				defer wg.Done()
-
-				if _, err := os.Stat(file); os.IsNotExist(err) {
-					if !cfg.SkipMissed {
-						fmt.Printf("%s %s\n", color.RedString("[MISS]"), file)
+			wg.Go(func(file string, obj *database.DataObject) func() error {
+				return func() error {
+					if cfg.Progressbar {
+						defer func() {
+							bar.Increment()
+						}()
 					}
 
-					if cfg.DeleteMissed {
-						fmt.Printf("%s DeleteMissed requested: deleting file `%s` from database\n", color.BlueString("[NOTE]"), file)
-						db.DeleteOne(file)
-						atomic.AddUint64(&cntDeleted, 1)
+					if _, err := os.Stat(file); os.IsNotExist(err) {
+						if !cfg.SkipMissed {
+							fmt.Printf("%s %s\n", color.RedString("[MISS]"), file)
+						}
+
+						if cfg.DeleteMissed {
+							fmt.Printf("%s DeleteMissed requested: deleting file `%s` from database\n", color.BlueString("[NOTE]"), file)
+							db.DeleteOne(file)
+							atomic.AddUint64(&cntDeleted, 1)
+						}
+
+						atomic.AddUint64(&cntMissed, 1)
+						return nil
 					}
 
-					atomic.AddUint64(&cntMissed, 1)
-					return
-				}
+					isChanged := false
 
-				isChanged := false
-
-				if obj.Length == 0 {
-					obj.Length = flength(file)
-					isChanged = true
-				}
-
-				data, err := readFile(file)
-				if err != nil {
-					log.Fatalf("error reading data: %s", err)
-				}
-
-				if obj.SHA1 == "" {
-					obj.SHA1, err = SHA1(bytes.NewReader(data))
-					if err != nil {
-						log.Fatalf("error calculating SHA1: %s", err)
+					if obj.Length == 0 {
+						obj.Length = flength(file)
+						isChanged = true
 					}
 
-					isChanged = true
-				}
+					if obj.SHA1 == "" || obj.SHA256 == "" {
+						sha1, sha256, err := generateActualChecksum(file)
+						if err != nil {
+							return err
+						}
 
-				if obj.SHA256 == "" {
-					obj.SHA256, err = SHA256(bytes.NewReader(data))
-					if err != nil {
-						log.Fatalf("error calculating SHA256: %s", err)
+						obj.SHA1 = sha1
+						obj.SHA256 = sha256
+
+						isChanged = true
 					}
 
-					isChanged = true
-				}
+					res := verify(file, obj.Length, obj.SHA1, obj.SHA256)
 
-				res := verify(file, obj.Length, obj.SHA1, obj.SHA256)
-
-				if isChanged {
-					db.WriteOne(file, &database.DataObject{
-						Length:   obj.Length,
-						SHA1:     obj.SHA1,
-						SHA256:   obj.SHA256,
-						Modified: time.Now().UTC(),
-					})
-				}
-
-				if res {
-					if !cfg.SkipOk {
-						fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
+					if isChanged {
+						db.WriteOne(file, &database.DataObject{
+							Length:   obj.Length,
+							SHA1:     obj.SHA1,
+							SHA256:   obj.SHA256,
+							Modified: time.Now().UTC(),
+						})
 					}
-					atomic.AddUint64(&cntPassed, 1)
-					return
+
+					if res {
+						if !cfg.SkipOk {
+							fmt.Printf("%s %s\n", color.GreenString("[ OK ]"), file)
+						}
+						atomic.AddUint64(&cntPassed, 1)
+						return nil
+					}
+					if !cfg.SkipFailed {
+						fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
+					}
+					atomic.AddUint64(&cntFailed, 1)
+					return nil
 				}
-				if !cfg.SkipFailed {
-					fmt.Printf("%s %s\n", color.RedString("[FAIL]"), file)
-				}
-				atomic.AddUint64(&cntFailed, 1)
-			}(key, objects[key])
+			}(key, objects[key]))
 		}
 
-		for i := 0; i < cap(sem); i++ {
-			sem <- true
+		err = wg.Wait()
+		if err != nil {
+			log.Fatalf("error handling threads")
 		}
-		wg.Wait()
 
 		if cfg.Progressbar {
 			bar.Finish()
@@ -179,24 +164,16 @@ func main() {
 	if cfg.DataDir != "" {
 		fmt.Printf("%s Checking for new files on %s\n", color.CyanString("[INFO]"), cfg.DataDir)
 
+		// TODO: check data dir for existence
+
 		err = filepath.Walk(cfg.DataDir, func(path string, info os.FileInfo, err error) error {
 			if info.IsDir() {
 				return nil
 			}
 			if isApplicable(path) {
-				data, err := readFile(path)
+				sha1, sha256, err := generateActualChecksum(path)
 				if err != nil {
-					log.Fatalf("error reading file: %s", err)
-				}
-
-				sha1, err := SHA1(bytes.NewReader(data))
-				if err != nil {
-					log.Fatalf("error calculating SHA1: %s", err)
-				}
-
-				sha256, err := SHA256(bytes.NewReader(data))
-				if err != nil {
-					log.Fatalf("error calculating SHA256: %s", err)
+					return err
 				}
 
 				db.WriteOne(path, &database.DataObject{

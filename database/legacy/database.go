@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/pkg/errors"
 )
 
 // DataObject is a file object in JSON database
@@ -52,25 +53,25 @@ func NewDatabase(path string) (*Database, error) {
 			Data: make(map[string]*DataObject),
 		})
 		if err != nil {
-			return nil, fmt.Errorf("Error marshaling initial JSON: %s", err)
+			return nil, errors.Errorf("Error marshaling initial JSON: %s", err)
 		}
 
 		err = ioutil.WriteFile(path, js, 0644)
 		if err != nil {
-			return nil, fmt.Errorf("Error creating schema: %s", err)
+			return nil, errors.Errorf("Error creating schema: %s", err)
 		}
 	}
 
 	fp, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("Error opening file: %s", err)
+		return nil, errors.Errorf("Error opening file: %s", err)
 	}
 	defer fp.Close()
 
 	decoder := json.NewDecoder(fp)
 	err = decoder.Decode(&database.Schema)
 	if err != nil {
-		return nil, fmt.Errorf("Error decoding JSON data: %s", err)
+		return nil, errors.Errorf("Error decoding JSON data: %s", err)
 	}
 
 	return &database, nil
