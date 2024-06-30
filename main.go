@@ -22,9 +22,8 @@ import (
 var (
 	wg sync.WaitGroup
 
-	version = "No version specified(probably trunk build)"
-	commit  = "master"
-	date    = "0000-00-00T00:00:00Z"
+	appVersion     = "No version specified(probably trunk build)"
+	buildTimestamp = "0000-00-00T00:00:00Z"
 
 	db          *database.Database
 	filePattern *regexp.Regexp

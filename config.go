@@ -39,7 +39,7 @@ func newConfig() *config {
 	}
 
 	if c.DbPath == "" {
-		set.Help(true)
+		set.Help()
 		os.Exit(1)
 	}
 
@@ -60,10 +60,9 @@ func (c *config) Metadata() map[string]flag.Flag {
 
 		version = fmt.Sprintf(`
 			version: %s
-			commit: %s
 			built with: %s
 			built at: %s
-		`, version, commit, runtime.Version(), date)
+		`, appVersion, runtime.Version(), buildTimestamp)
 
 		desc = `
 		checksum creates database (actually just a JSON file) to store file length, SHA1, SHA256
