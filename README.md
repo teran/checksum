@@ -43,9 +43,9 @@ Flags:
 ## Why to use checksum but md5sum, shasum and other
 
 checksum provides straight workflow for verification and adding new files processes
-to avoid remembering someting like `find $dir | xargs md5sum >> /tmp/database.txt`.
+to avoid remembering something like `find $dir | xargs md5sum >> /tmp/database.txt`.
 
-checkum automatically:
+checksum automatically:
 
 * verifies files
 * adds new
@@ -62,9 +62,10 @@ master.
 System-wide requirements:
 
 * Go
+* goreleaser
 
 Build:
 
 ```bash
-make predependencies build
+goreleaser build --snapshot --clean
 ```
