@@ -1,5 +1,9 @@
 # checksum
 
+[![Verify](https://github.com/teran/checksum/actions/workflows/verify.yml/badge.svg?branch=master)](https://github.com/teran/checksum/actions/workflows/verify.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/teran/checksum)](https://goreportcard.com/report/github.com/teran/checksum)
+[![Go Reference](https://pkg.go.dev/badge/github.com/teran/checksum.svg)](https://pkg.go.dev/github.com/teran/checksum)
+
 Utility to store length, sha1, sha256 hashes of files in dedicated "database"
 (actually just a JSON file) to verify it later as a part of consistency check
 with automatic new file indexing.
