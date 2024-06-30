@@ -1,17 +1,19 @@
 package main
 
 import (
-	"bytes"
+	"context"
 	"crypto/sha1"
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/teran/checksum/utils/concurrent"
 )
 
 func completeArgs(word string) {
@@ -28,38 +30,6 @@ func completeArgs(word string) {
 	}, " "))
 }
 
-func readFile(fn string) ([]byte, error) {
-	fp, err := os.Open(fn)
-	if err != nil {
-		return nil, err
-	}
-	defer fp.Close()
-
-	return ioutil.ReadAll(fp)
-}
-
-// SHA256 ...
-func SHA256(rd io.Reader) (string, error) {
-	h := sha256.New()
-	_, err := io.Copy(h, rd)
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%x", h.Sum(nil)), nil
-}
-
-// SHA1 ...
-func SHA1(rd io.Reader) (string, error) {
-	h := sha1.New()
-	_, err := io.Copy(h, rd)
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%x", h.Sum(nil)), nil
-}
-
 func flength(filename string) int64 {
 	stat, err := os.Stat(filename)
 	if err != nil {
@@ -69,22 +39,41 @@ func flength(filename string) int64 {
 	return stat.Size()
 }
 
+func generateActualChecksum(filename string) (sha1sum string, sha256sum string, err error) {
+	fi, err := os.Stat(filename)
+	if err != nil {
+		return "", "", err
+	}
+
+	fp, err := os.Open(filename)
+	if err != nil {
+		return "", "", err
+	}
+	defer fp.Close()
+
+	sha1hasher := sha1.New()
+	sha256hasher := sha256.New()
+
+	w, err := concurrent.NewConcurrentMultiWriter(context.TODO(), sha1hasher, sha256hasher)
+	if err != nil {
+		return "", "", err
+	}
+
+	n, err := io.Copy(w, fp)
+	if err != nil {
+		return "", "", err
+	}
+
+	if n != fi.Size() {
+		return "", "", io.ErrShortWrite
+	}
+
+	return hex.EncodeToString(sha1hasher.Sum(nil)), hex.EncodeToString(sha256hasher.Sum(nil)), nil
+}
+
 func verify(path string, length int64, sha1, sha256 string) bool {
-	data, err := readFile(path)
+	actSHA1, actSHA256, err := generateActualChecksum(path)
 	if err != nil {
-		log.Printf("error reading file: %s", err)
-		return false
-	}
-
-	actSHA1, err := SHA1(bytes.NewReader(data))
-	if err != nil {
-		log.Printf("error calculating SHA1: %s", err)
-		return false
-	}
-
-	actSHA256, err := SHA256(bytes.NewReader(data))
-	if err != nil {
-		log.Printf("error calculating SHA256: %s", err)
 		return false
 	}
 
