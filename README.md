@@ -1,12 +1,12 @@
-checksum
-========
+# checksum
 
-Utility to store length, sha1, sha256 hashes of files in dedicated "database"(actually just a JSON file) to
-verify it later as a part of consistency check with automatic new file indexing.
+Utility to store length, sha1, sha256 hashes of files in dedicated "database"
+(actually just a JSON file) to verify it later as a part of consistency check
+with automatic new file indexing.
 
-Usage
------
+## Usage
 
+<!-- markdownlint-disable MD013 -->
 ```man
 Utility to verify files consistency with length, SHA1 and SHA256
 
@@ -38,10 +38,9 @@ Flags:
     --version, -V                Print application and Golang versions                  (type: bool)
     -h, --help                   show help                                              (type: bool)
 ```
+<!-- markdownlint-enable MD013 -->
 
-
-Why not shasum/md5sum/etc.?
----------------------------
+## Why to use checksum but md5sum, shasum and other
 
 checksum provides straight workflow for verification and adding new files processes
 to avoid remembering someting like `find $dir | xargs md5sum >> /tmp/database.txt`.
@@ -52,13 +51,13 @@ checkum automatically:
 * adds new
 * report about fails and misses
 
-How to install
---------------
+## How to install
 
-Just refer to [releases page](https://github.com/teran/checksum/releases) and download appropriate binary for your platform or build your own one right from master.
+Just refer to [releases page](https://github.com/teran/checksum/releases) and
+download appropriate binary for your platform or build your own one right from
+master.
 
-Build
------
+## Build
 
 System-wide requirements:
 
