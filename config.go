@@ -31,9 +31,11 @@ func newConfig() *config {
 	var c config
 
 	set := flag.NewFlagSet(flag.Flag{})
-	set.ParseStruct(&c, os.Args...)
+	if err := set.ParseStruct(&c, os.Args...); err != nil {
+		panic(err)
+	}
 
-	if c.Version == true {
+	if c.Version {
 		printVersion()
 		os.Exit(0)
 	}

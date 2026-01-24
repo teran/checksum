@@ -35,12 +35,12 @@ var (
 func main() {
 	cfg := newConfig()
 
-	if cfg.Complete == true {
+	if cfg.Complete {
 		completeArgs(flag.Arg(1))
 		return
 	}
 
-	if cfg.Progressbar == true {
+	if cfg.Progressbar {
 		cfg.SkipOk = true
 	}
 
