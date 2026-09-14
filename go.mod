@@ -1,13 +1,13 @@
 module github.com/teran/checksum
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/cosiner/flag v0.5.2
 	github.com/fatih/color v1.19.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/sync v0.22.0
+	golang.org/x/sync v0.23.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.28
 )
 
